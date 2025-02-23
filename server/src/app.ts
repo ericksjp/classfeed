@@ -1,9 +1,12 @@
-import express, {Request, Response} from "express"
+import express from "express"
+import rootRouter from "./routes";
+import notFoundError from "./middlewares/not-found-error";
 
 const app = express();
+app.use(express.json())
 
-app.get("/", (_: Request, res: Response) => {
-  res.send({message: "hello world"})
-})
+app.use('/api', rootRouter)
+
+app.use(notFoundError);
 
 export default app
