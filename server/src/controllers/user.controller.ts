@@ -16,3 +16,22 @@ export async function addUser(req: Request, res: Response) {
     res.send(500);
   }
 }
+
+export async function getUserById(req: Request, res: Response) {
+  try {
+    const userId = req.params.id;
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const { dataValues } = user;
+
+    res.status(200).json({...dataValues, password: undefined});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
