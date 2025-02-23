@@ -6,17 +6,6 @@ export async function getUsers(req: Request, res: Response) {
   res.send(resp);
 }
 
-export async function addUser(req: Request, res: Response) {
-  const user = req.body;
-  try {
-    const newUser = await User.create(user);
-    res.status(201).send(newUser);
-  } catch (err) {
-    console.error(err);
-    res.send(500);
-  }
-}
-
 export async function getUserById(req: Request, res: Response) {
   try {
     const userId = req.params.id;
