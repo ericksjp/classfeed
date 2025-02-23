@@ -11,7 +11,7 @@ services:
       - DB_HOST=db
       - JWT_SECRET=123456
     volumes:
-      - ./server:/app-server
+      - ./server:/opt/app
     container_name: classfeed_server
     restart: always
     depends_on:
@@ -32,4 +32,3 @@ services:
 
 volumes:
   classfeed-db:
-
