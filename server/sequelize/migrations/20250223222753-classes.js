@@ -45,7 +45,6 @@ module.exports = {
     await queryInterface.createTable("user-class", {
       userId: {
         type: Sequelize.UUID,
-        primaryKey: true,
         references: {
           model: "users",
           key: "id"
@@ -55,7 +54,6 @@ module.exports = {
       },
       classId: {
         type: Sequelize.UUID,
-        primaryKey: true,
         references: {
           model: "classes",
           key: "id"
@@ -64,11 +62,18 @@ module.exports = {
         onUpdate: "CASCADE"
       }
     });
+
+    await queryInterface.addConstraint('user-class', {
+      fields: ['userId', 'classId'],
+      type: 'primary key',
+      name: 'user_class_primary_key'
+    });
   },
+  
 
   async down (queryInterface, Sequelize) {
     await queryInterface.dropTable("user-class");
 
-    await queryInterface.dropTable("classes", { onDelete: "CASCADE" });
+    await queryInterface.dropTable("classes");
   }
 };

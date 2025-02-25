@@ -59,6 +59,7 @@ Class.init(
     tableName: "classes",
     sequelize: db,
     timestamps: false
-});
+}
+);
 
 export default Class;
