@@ -35,6 +35,11 @@ class User extends Model {
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
+    this.hasMany(models.Feedback, {
+      foreignKey: "studentId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
   }
 
   public static initialize(sequelize: Sequelize) {

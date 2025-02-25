@@ -13,6 +13,11 @@ class Lesson extends Model {
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
+    this.hasMany(models.Feedback, {
+      foreignKey: "lessonId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
+    });
   }
 
   public static initialize(sequelize: Sequelize) {
