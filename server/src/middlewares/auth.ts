@@ -1,6 +1,8 @@
 import { Response, Request, NextFunction } from 'express'
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import authConfig from '../config/authConfig';
+import jwt from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
+
 
 export default function(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
