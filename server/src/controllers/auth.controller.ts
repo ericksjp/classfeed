@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { User } from "../models";
 import { compareSync, hashSync } from "bcryptjs";
 import authConfig from "../config/authConfig";
-import jwt  from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 
-export async function signup(req: Request, res: Response) {
+async function signup(req: Request, res: Response) {
   const { email, name, password, dateOfBirth, profilePicture } = req.body;
 
   try {
@@ -32,13 +32,13 @@ export async function signup(req: Request, res: Response) {
   }
 }
 
-export async function login(req: Request, res: Response) {
+async function login(req: Request, res: Response) {
   const { email, password } = req.body;
 
   try {
     const user = await User.findOne({
-        where: { email },
-        raw: true
+      where: { email },
+      raw: true,
     });
     if (!user) {
       res.status(404).json({ message: "User Not Found" });
@@ -52,14 +52,21 @@ export async function login(req: Request, res: Response) {
       return;
     }
 
-    const { id, name }= user
+    const { id, name } = user;
 
     res.status(201).json({
-        success: "You are successfully connected, " + name,
-        token: jwt.sign({id}, authConfig.secret, {expiresIn: authConfig.expiresIn})
-    })
+      success: "You are successfully connected, " + name,
+      token: jwt.sign({ id }, authConfig.secret, {
+        expiresIn: authConfig.expiresIn,
+      }),
+    });
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Internal Server Error" });
   }
+}
+
+export default {
+  login,
+  signup,
 };
