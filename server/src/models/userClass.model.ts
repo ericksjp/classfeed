@@ -12,21 +12,25 @@ class UserClass extends Model {
 UserClass.init({
     userId: {
         type: DataTypes.UUID,
+        allowNull: false,
         references: {
             model: User,
             key: "id"
-        }
+        },
+        field: "user_id"
     },
     classId: {
         type: DataTypes.UUID,
+        allowNull: false,
         references: {
             model: Class,
             key: "id"
-        }
+        },
+        field: "class_id"
     }
 },
 {
-    tableName: "user-class",
+    tableName: "user_class",
     sequelize: db,
     timestamps: false
 }
