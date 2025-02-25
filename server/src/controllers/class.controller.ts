@@ -4,10 +4,17 @@ import { Class } from "../models/associations";
 import db from "../models";
 import Sequelize from "sequelize";
 
+const allowedStatuses = ["Ativo", "Arquivado"];
+
 export async function createClass(req: Request, res: Response) {
     const { id, name, subject, institution, status, location } = req.body;
 
     try {
+        if(!allowedStatuses.includes(status)) {
+            res.status(400).json({ message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}` });
+            return;
+        }
+
         const newClass = await Class.create({
             name,
             subject,
@@ -90,6 +97,11 @@ export async function updateClass(req: Request, res: Response) {
     const { id, name, subject, institution, status, location } = req.body;
 
     try {
+        if(!allowedStatuses.includes(status)) {
+            res.status(400).json({ message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}` });
+            return;
+        }
+
         await Class.update({
             name,
             subject,
@@ -99,6 +111,32 @@ export async function updateClass(req: Request, res: Response) {
         },
         {
             where: {teacherId: id, id: classId}
+        }
+        );
+
+        res.status(200).json(await Class.findByPk(classId));
+    } catch(err) {
+        console.error("Error updating Class:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export async function updateClassStatus(req: Request, res: Response) {
+    const classId = req.params.id;
+    const { id, status } = req.body;
+
+    try {
+        if(!allowedStatuses.includes(status)) {
+            res.status(400).json({ message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}` });
+            return;
+        }
+    
+
+        await Class.update({
+            status
+        },
+        {
+            where: { teacherId: id, id: classId }
         }
         );
 
