@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "../models/associations";
+import User from "../models/user.model";
 import { compareSync, hashSync } from "bcryptjs";
 import authConfig from "../config/authConfig";
 import jwt  from 'jsonwebtoken';
