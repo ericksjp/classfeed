@@ -30,7 +30,7 @@ module.exports = {
           type: Sequelize.GEOMETRY('POINT'),
           allowNull: true
       },
-      teacherId: {
+      teacher_id: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
@@ -42,8 +42,8 @@ module.exports = {
       }
     });
 
-    await queryInterface.createTable("user-class", {
-      userId: {
+    await queryInterface.createTable("user_class", {
+      user_id: {
         type: Sequelize.UUID,
         references: {
           model: "users",
@@ -52,7 +52,7 @@ module.exports = {
         onDelete: "CASCADE",
         onUpdate: "CASCADE"
       },
-      classId: {
+      class_id: {
         type: Sequelize.UUID,
         references: {
           model: "classes",
@@ -63,16 +63,19 @@ module.exports = {
       }
     });
 
-    await queryInterface.addConstraint('user-class', {
-      fields: ['userId', 'classId'],
-      type: 'primary key',
-      name: 'user_class_primary_key'
+    await queryInterface.addConstraint("user_class", {
+      fields: ["user_id", "class_id"],
+      type: "primary key",
+      name: "user_class_primary_key"
     });
   },
   
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable("user-class");
+
+    await queryInterface.removeConstraint("user_class", "user_class_primary_key");
+
+    await queryInterface.dropTable("user_class");
 
     await queryInterface.dropTable("classes");
   }

@@ -52,7 +52,8 @@ Class.init(
         references: {
             model: User,
             key: "id"
-        }
+        },
+        field: "teacher_id"
     }
 },
 {
