@@ -102,7 +102,7 @@ export async function updateClass(req: Request, res: Response) {
             return;
         }
 
-        await Class.update({
+        const [updatedRows] = await Class.update({
             name,
             subject,
             institution,
@@ -113,6 +113,11 @@ export async function updateClass(req: Request, res: Response) {
             where: {teacherId: id, id: classId}
         }
         );
+
+        if(updatedRows === 0) {
+            res.status(404).json({ message: `Failed to update the class with the given ID (${classId})` });
+            return;
+        }
 
         res.status(200).json(await Class.findByPk(classId));
     } catch(err) {
@@ -130,9 +135,8 @@ export async function updateClassStatus(req: Request, res: Response) {
             res.status(400).json({ message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}` });
             return;
         }
-    
 
-        await Class.update({
+        const [updatedRows] = await Class.update({
             status
         },
         {
@@ -140,9 +144,35 @@ export async function updateClassStatus(req: Request, res: Response) {
         }
         );
 
+        if(updatedRows === 0) {
+            res.status(404).json({ message: `Failed to update the class with the given ID (${classId})` });
+            return;
+        }
+
         res.status(200).json(await Class.findByPk(classId));
     } catch(err) {
-        console.error("Error updating Class:", err);
+        console.error("Error updating Class status:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export async function deleteClass(req: Request, res: Response) {
+    const classId = req.params.id;
+    const { id } = req.body;
+
+    try {
+        const deletedRows = await Class.destroy({
+            where: { teacherId: id, id: classId }
+        });
+
+        if(deletedRows === 0) {
+            res.status(404).json({ message: `Failed to delete the class with the given ID (${classId})` });
+            return;
+        }
+
+        res.status(200).json({ message: `The class with ID (${classId}) has been successfully deleted` })
+    } catch(err) {
+        console.error("Error deleting Class:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
