@@ -2,10 +2,11 @@ import { Sequelize } from 'sequelize'
 import config from '../config/sequelize'
 import User from './user.model';
 import Class from './class.model';
+import Lesson from './lesson.model';
 
 const sequelize = new Sequelize(config);
 
-const models = {User, Class}
+const models = {User, Class, Lesson}
 Object.values(models).forEach(model => model.initialize(sequelize))
 Object.values(models).forEach(model => model.associate && model.associate(models))
 
