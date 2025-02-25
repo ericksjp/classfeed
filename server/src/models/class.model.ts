@@ -17,7 +17,8 @@ class Class extends Model {
   public location?: LocationType;
   public teacherId!: string;
 
-   public static associate(models: { User: typeof User }) {
+   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   public static associate(models: any) {
     this.belongsToMany(models.User, {
       through: 'user_class',
       foreignKey: 'classId',
@@ -25,9 +26,13 @@ class Class extends Model {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     });
-
     this.belongsTo(models.User, {
       foreignKey: 'teacherId',
+      onDelete: 'CASCADE',
+      onUpdate: 'CASCADE',
+    });
+    this.hasMany(models.Lesson, {
+      foreignKey: 'classId',
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     });

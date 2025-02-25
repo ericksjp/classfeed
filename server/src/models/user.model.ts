@@ -20,7 +20,8 @@ class User extends Model {
       classes: Association<User, Class>
   }
 
- public static associate(models: { Class: typeof Class }) {
+ // eslint-disable-next-line @typescript-eslint/no-explicit-any
+ public static associate(models: any) {
     this.belongsToMany(models.Class, {
       through: "user_class",
       foreignKey: "userId",
