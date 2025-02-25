@@ -1,6 +1,5 @@
-import { Model, DataTypes } from "sequelize";
-
 import db from ".";
+import { Model, DataTypes } from "sequelize";
 
 class User extends Model {
   public readonly id!: string;
