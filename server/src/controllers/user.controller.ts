@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { User } from "../models/associations";
+import { User } from "../models/";
 import { hashSync } from "bcryptjs";
 
 export async function getUsers(req: Request, res: Response) {

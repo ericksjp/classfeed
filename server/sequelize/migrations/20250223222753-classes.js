@@ -30,7 +30,7 @@ module.exports = {
           type: Sequelize.GEOMETRY('POINT'),
           allowNull: true
       },
-      teacher_id: {
+      teacherId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
@@ -43,7 +43,7 @@ module.exports = {
     });
 
     await queryInterface.createTable("user_class", {
-      user_id: {
+      userId: {
         type: Sequelize.UUID,
         references: {
           model: "users",
@@ -52,7 +52,7 @@ module.exports = {
         onDelete: "CASCADE",
         onUpdate: "CASCADE"
       },
-      class_id: {
+      classId: {
         type: Sequelize.UUID,
         references: {
           model: "classes",
@@ -64,9 +64,8 @@ module.exports = {
     });
 
     await queryInterface.addConstraint("user_class", {
-      fields: ["user_id", "class_id"],
+      fields: ["userId", "classId"],
       type: "primary key",
-      name: "user_class_primary_key"
     });
   },
   

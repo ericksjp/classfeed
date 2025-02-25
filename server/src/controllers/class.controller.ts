@@ -1,8 +1,6 @@
 import { Request, Response } from "express";
 
-import { Class } from "../models/associations";
-import db from "../models";
-import Sequelize from "sequelize";
+import { Class } from "../models";
 
 const allowedStatuses = ["Ativo", "Arquivado"];
 
@@ -31,69 +29,46 @@ export async function createClass(req: Request, res: Response) {
     }
 }
 
+// get the classes of a teacher
 export async function getClasses(req: Request, res: Response) {
-    const { id } = req.body;
-
-    try {
-        const classes = await db.query(
-            `
-            SELECT C.*
-            FROM Classes C
-            LEFT JOIN User_Class UC ON C.id = UC.class_id
-            LEFT JOIN Users U ON U.id = UC.user_id OR U.id = C.teacher_id
-            WHERE U.id = :userId;
-            `,
-            {
-                replacements: { userId: id },
-                type: Sequelize.QueryTypes.SELECT
-            }
-        );
-
-        if(classes.length === 0 ) {
-            res.status(404).json({ message: "You are not part of any class" });
-            return;
-        }
-
-        res.status(200).json(classes);
-    } catch(err) {
-        console.error("Error getting Classes:", err);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+  const { id } = req.body;
+  try {
+    const classes = await Class.findAll({
+      where: { teacherId: id },
+      raw: true,
+    });
+    res.status(200).json(classes);
+  } catch (err) {
+    console.error("Error getting Classes:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 }
 
+// get a class of a teacher by its ID
 export async function getClassById(req: Request, res: Response) {
-    const classId = req.params.id;
+    const { classId } = req.params;
     const { id } = req.body;
+    try {
+    const _class = await Class.findOne({
+        where: { id: classId, teacherId: id },
+        raw: true,
+    });
 
-    try {   
-        const myClass = await db.query(
-            `
-            SELECT C.*
-            FROM Classes C
-            LEFT JOIN User_Class UC ON C.id = UC.class_id
-            LEFT JOIN Users U ON U.id = UC.user_id OR U.id = C.teacher_id
-            WHERE U.id = :userId AND C.id = :classId;
-            `,
-            {
-                replacements: { userId: id, classId },
-                type: Sequelize.QueryTypes.SELECT
-            }
-        );
+      if (!_class) {
+        res.status(404).json({ message: "Class not found" });
+        return;
+      }
 
-        if(myClass.length === 0 ) {
-            res.status(404).json({ message: "Class not found" });
-            return;
-        }
-
-        res.status(200).json(myClass);
-    } catch(err) {
-        console.error("Error getting Class by id:", err);
-        res.status(500).json({ message: "Internal Server Error" });
+      res.status(200).json(_class);
+    } catch (err) {
+      console.error("Error getting Classes:", err);
+      res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
+// update a class of a teacher by its ID
 export async function updateClass(req: Request, res: Response) {
-    const classId = req.params.id;
+    const {classId} = req.params;
     const { id, name, subject, institution, status, location } = req.body;
 
     try {
@@ -126,8 +101,9 @@ export async function updateClass(req: Request, res: Response) {
     }
 }
 
+// update the status of a class of a teacher by its ID
 export async function updateClassStatus(req: Request, res: Response) {
-    const classId = req.params.id;
+    const { classId } = req.params;
     const { id, status } = req.body;
 
     try {
@@ -156,8 +132,9 @@ export async function updateClassStatus(req: Request, res: Response) {
     }
 }
 
+// delete a class of a teacher by its ID
 export async function deleteClass(req: Request, res: Response) {
-    const classId = req.params.id;
+    const { classId } = req.params;
     const { id } = req.body;
 
     try {

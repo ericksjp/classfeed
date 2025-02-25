@@ -1,4 +1,4 @@
-import sequelize from './models/index';
+import {sequelize} from './models/index';
 import app from "./app";
 import { Server } from 'http';
 
