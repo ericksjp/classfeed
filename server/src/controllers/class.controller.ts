@@ -55,8 +55,8 @@ export async function getClasses(req: Request, res: Response) {
 }
 
 export async function getClassById(req: Request, res: Response) {
+    const classId = req.params.id;
     const { id } = req.body;
-    const classId = req.params.classId;
 
     try {   
         const myClass = await db.query(
@@ -81,6 +81,30 @@ export async function getClassById(req: Request, res: Response) {
         res.status(200).json(myClass);
     } catch(err) {
         console.error("Error getting Class by id:", err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+export async function updateClass(req: Request, res: Response) {
+    const classId = req.params.id;
+    const { id, name, subject, institution, status, location } = req.body;
+
+    try {
+        await Class.update({
+            name,
+            subject,
+            institution,
+            status,
+            location
+        },
+        {
+            where: {teacherId: id, id: classId}
+        }
+        );
+
+        res.status(200).json(await Class.findByPk(classId));
+    } catch(err) {
+        console.error("Error updating Class:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
 }
