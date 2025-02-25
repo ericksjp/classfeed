@@ -1,9 +1,12 @@
 import {Router} from 'express'
-import { addUser, getUsers } from '../controllers/user.controller';
+import { deleteUserById, getUsers, getUserById, updateUser } from '../controllers/user.controller';
+import auth from "../middlewares/auth"
 
 const userRoutes = Router();
 
-userRoutes.get('/', getUsers)
-userRoutes.post('/', addUser)
+userRoutes.get('/', auth,  getUsers)
+userRoutes.get('/:id',auth, getUserById)
+userRoutes.delete('/:id', auth, deleteUserById)
+userRoutes.patch('/:id', auth, updateUser)
 
 export default userRoutes;
