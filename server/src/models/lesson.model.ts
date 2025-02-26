@@ -28,13 +28,14 @@ class Lesson extends Model {
           defaultValue: DataTypes.UUIDV4,
           primaryKey: true,
         },
-        name: {
+        title:{
           type: DataTypes.STRING,
           allowNull: false,
         },
         dateTime: {
           type: DataTypes.DATE,
           allowNull: false,
+          defaultValue: DataTypes.NOW,
         },
         classId: {
           type: DataTypes.UUID,
