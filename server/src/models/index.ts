@@ -12,5 +12,5 @@ Object.values(models).forEach(model => model.initialize(sequelize))
 Object.values(models).forEach(model => model.associate && model.associate(models))
 
 export {
-  sequelize, User, Class
+  sequelize, User, Class, Lesson, Feedback
 }

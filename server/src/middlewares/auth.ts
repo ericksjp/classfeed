@@ -6,6 +6,7 @@ import type { JwtPayload } from 'jsonwebtoken';
 
 export default function(req: Request, res: Response, next: NextFunction) {
     const authHeader = req.headers.authorization;
+    console.log("Oi");
     if(!authHeader){
         res.status(401).json({error: "Token doesn't exist"});
         return;
