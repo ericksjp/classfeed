@@ -2,7 +2,7 @@ import {Router} from "express";
 import * as lessonController from "../controllers/lesson.controller";
 import {verifyUserClass} from "../middlewares/verify"
 
-const lessonRoutes = Router();
+const lessonRoutes = Router({ mergeParams: true});
 
 lessonRoutes.get("/",verifyUserClass, lessonController.getlessons);
 lessonRoutes.get("/:lessonId", verifyUserClass, lessonController.getLessonById);
