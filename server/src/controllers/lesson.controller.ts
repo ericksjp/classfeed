@@ -54,19 +54,18 @@ export async function createLesson(req:Request, res:Response){
 export async function updateLesson(req:Request, res:Response){
     const {lessonId} = req.params;
     try {
-        const lesson = await Lesson.findByPk(lessonId);
-        if(!lesson){
-            res.status(404).json({message: "Lesson not found"});
-            return;
-        }
         const {title} = req.body;
-        const updatedData = await Lesson.update(
+        const [updatedData] = await Lesson.update(
             {title},
             {where:{
                 id: lessonId,
             }}
         );
-        res.status(200).json(updatedData);
+        if(updatedData === 0){
+            res.status(404).json({message: "Lesson not found"});
+            return;
+        }
+        res.status(200).json(await Lesson.findByPk(lessonId));
     } catch (error) {
         console.log(error);
         res.status(500).json({message: "Internal Server Error"});
