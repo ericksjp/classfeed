@@ -1,11 +1,11 @@
-import {Router} from 'express'
-import { deleteUserById, getUsers, getUserById, updateUser } from '../controllers/user.controller';
-import auth from "../middlewares/auth"
+import { Router } from "express";
+import UserController from "../controllers/user.controller";
+import Auth from "../middlewares/auth";
 
 const userRoutes = Router();
 
-userRoutes.get('/', auth,  getUsers)
-userRoutes.get('/:id',auth, getUserById)
-userRoutes.delete('/:id', auth, deleteUserById)
-userRoutes.patch('/:id', auth, updateUser)
+userRoutes.get("/", Auth, UserController.get);
+userRoutes.delete("/", Auth, UserController.remove);
+userRoutes.patch("/", Auth, UserController.update);
+
 export default userRoutes;
