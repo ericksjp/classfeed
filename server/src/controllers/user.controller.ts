@@ -2,44 +2,30 @@ import { Request, Response } from "express";
 import { User } from "../models/";
 import { hashSync } from "bcryptjs";
 
-export async function getUsers(req: Request, res: Response) {
+export async function get(req: Request, res: Response) {
   try {
-    const resp = await User.findAll({
-      attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
-    });
-    res.status(200).json(resp);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
-}
-
-export async function getUserById(req: Request, res: Response) {
-  try {
-    const userId = req.params.id;
-    const user = await User.findByPk(userId);
+    const { id } = req.body
+    const user = await User.findByPk(id, {raw: true});
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
     }
 
-    const { dataValues } = user;
-
-    res.status(200).json({ ...dataValues, password: undefined });
+    res.status(200).json({ ...user, password: undefined });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-export async function deleteUserById(req: Request, res: Response) {
+export async function remove(req: Request, res: Response) {
   try {
-    const userId = req.params.id;
+    const { id } = req.body
 
     const result = await User.destroy({
       where: {
-        id: userId,
+        id: id,
       },
     });
 
@@ -48,17 +34,17 @@ export async function deleteUserById(req: Request, res: Response) {
       return;
     }
 
-    res.status(204).json();
+    res.status(204).send();
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Internal Server Error" });
   }
 }
 
-export async function updateUser(req: Request, res: Response) {
+export async function update(req: Request, res: Response) {
   try {
-    const userId = req.params.id;
-    const user = await User.findByPk(userId);
+    const { id } = req.body;
+    const user = await User.findByPk(id);
 
     if (!user) {
       res.status(404).json({ message: "User not found" });
@@ -85,4 +71,10 @@ export async function updateUser(req: Request, res: Response) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error" });
   }
+}
+
+export default {
+  get,
+  update,
+  remove,
 }
