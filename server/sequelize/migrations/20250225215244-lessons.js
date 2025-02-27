@@ -17,7 +17,7 @@ module.exports = {
       dateTime: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW
+        defaultValue: Sequelize.NOW,
       },
       classId:{
         type: Sequelize.UUID,
