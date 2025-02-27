@@ -1,0 +1,9 @@
+import { Router } from "express";
+import * as feedbackController from "../controllers/feedback.controller";
+import {verifyUserClass} from "../middlewares/verify";
+
+const feedbackRoutes = Router({ mergeParams: true});
+
+feedbackRoutes.get("/",verifyUserClass, feedbackController.getFeedbacks);
+
+export default feedbackRoutes;

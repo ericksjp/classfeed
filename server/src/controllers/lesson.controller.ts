@@ -11,7 +11,7 @@ export async function getlessons(req:Request, res:Response){
         res.status(200).json(lessons);
     } catch (error) {
         console.log(error);
-        res.status(500).json({message: "Internal Server Error"})
+        res.status(500).json({message: "Internal Server Error"});
     }
 }
 
@@ -35,13 +35,14 @@ export async function getLessonById(req:Request, res:Response){
     }
 
 }
+
 export async function createLesson(req:Request, res:Response){
-    const {title}= req.body;
     const {classId} = req.params
+    const {title}= req.body;
     try {
         const newLesson = await Lesson.create({
             title,
-            classId
+            classId,
         });
         res.status(201).json(newLesson);
     } catch (error) {
