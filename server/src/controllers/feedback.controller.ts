@@ -12,6 +12,7 @@ export async function getFeedbacks(req:Request, res:Response){
                 teacherId: id,
             }
         })
+        console.log("Professor: " + teacher);
         if(!teacher){
             res.status(403).json({message: "Error authorization denied"});
             return;
@@ -40,6 +41,50 @@ export async function getFeedbackById(req:Request, res:Response){
             return;
         }
         res.status(200).json(feedback);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+}export async function createFeedback(req:Request, res:Response){
+    try {
+        const {id} = req.body;
+        const {lessonId, anonymous,comment,
+            content,methodology,engagement} = req.body;
+        const {classId} = req.params;
+        const teacher = await Class.findOne({
+            where:{
+                id:classId,
+                teacherId: id,
+            }
+        })
+        if(teacher){
+            res.status(403).json({message: "Error authorization denied"});
+            return;
+        }
+        const newFeedback = await Feedback.create({
+            lessonId,
+            studentId: id,
+            anonymous,
+            comment,
+            content,
+            methodology,
+            engagement
+        });
+        if(anonymous === true){
+            const response = {
+                id: newFeedback.id,
+                lessonId: newFeedback.lessonId,
+                anonymous:newFeedback.anonymous,
+                comment: newFeedback.comment,
+                content: newFeedback.content,
+                methodology: newFeedback.methodology,
+                engagement: newFeedback.engagement
+            }
+            res.status(201).json(response);
+            return;
+        }
+        res.status(201).json(newFeedback);
 
     } catch (error) {
         console.log(error);
