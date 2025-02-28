@@ -24,3 +24,25 @@ export async function getFeedbacks(req:Request, res:Response){
         res.status(500).json({message: "Internal Server Error"});
     }
 }
+
+export async function getFeedbackById(req:Request, res:Response){
+    try {
+        const {feedbackId} = req.params;
+        const {lessonId} = req.params;
+        const lessonFeedbackExists = await Feedback.findOne({where:{lessonId}})
+        if(!lessonFeedbackExists){
+            res.status(404).json({message: "Feedback does not exist in lesson"});
+            return;
+        }
+        const feedback = await Feedback.findOne({where:{lessonId, id:feedbackId}});
+        if(!feedback){
+            res.status(404).json({message: "Feedback not found"});
+            return;
+        }
+        res.status(200).json(feedback);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+}
