@@ -91,3 +91,29 @@ export async function getFeedbackById(req:Request, res:Response){
         res.status(500).json({message: "Internal Server Error"});
     }
 }
+
+export async function deleteFeedback(req:Request, res:Response){
+    try {
+        const {lessonId} = req.params;
+        const {feedbackId} = req.params
+        const lessonFeedbackExists = await Feedback.findOne({where:{lessonId, id:feedbackId}})
+        if(!lessonFeedbackExists){
+            res.status(404).json({message: "Feedback does not exist in lesson"});
+            return;
+        }
+        const deletedData = await Feedback.destroy({
+            where:{
+                id:feedbackId
+            }
+        })
+        if(deletedData === 0){
+            res.status(404).json({message: "Feedback not found"});
+            return;
+        }
+        res.status(200).json({message: "Feedback deleted successfully"});
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
+}
