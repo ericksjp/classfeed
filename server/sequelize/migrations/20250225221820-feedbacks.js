@@ -1,7 +1,5 @@
 "use strict";
 
-const { QueryInterface } = require('sequelize');
-
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -9,9 +7,8 @@ module.exports = {
       id: {
         type: Sequelize.UUID,
         primaryKey: true,
-        defaultValue: Sequelize.UUIDV4,
+        defaultValue: Sequelize.UUIDV4
       },
-
       lessonId: {
         type: Sequelize.UUID,
         allowNull: false,
@@ -72,16 +69,21 @@ module.exports = {
         },
       },
     });
-    await queryInterface.removeConstraint("feedbacks", "feedbacks_primary_key");
 
     await queryInterface.addConstraint("feedbacks", {
-      fields: ["id"],
-      type: "primary key",
+      fields: ["content", "methodology", "engagement"],
+      type: "check",
+      where: {
+        [Sequelize.Op.or]: [
+          { content: { [Sequelize.Op.ne]: null } },
+          { methodology: { [Sequelize.Op.ne]: null } },
+          { engagement: { [Sequelize.Op.ne]: null } },
+        ],
+      },
     });
   },
 
   async down(queryInterface, Sequelize) {
-    await queryInterface.removeConstraint("feedbacks", "feedbacks_primary_key");
     await queryInterface.dropTable("feedbacks");
   },
 };
