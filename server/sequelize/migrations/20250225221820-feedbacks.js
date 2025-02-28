@@ -6,6 +6,12 @@ const { QueryInterface } = require('sequelize');
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("feedbacks", {
+      id: {
+        type: Sequelize.UUID,
+        primaryKey: true,
+        defaultValue: Sequelize.UUIDV4,
+      },
+
       lessonId: {
         type: Sequelize.UUID,
         allowNull: false,
@@ -66,22 +72,11 @@ module.exports = {
         },
       },
     });
+    await queryInterface.removeConstraint("feedbacks", "feedbacks_primary_key");
 
     await queryInterface.addConstraint("feedbacks", {
-      fields: ["studentId", "lessonId"],
+      fields: ["id"],
       type: "primary key",
-    });
-
-    await queryInterface.addConstraint("feedbacks", {
-      fields: ["content", "methodology", "engagement"],
-      type: "check",
-      where: {
-        [Sequelize.Op.or]: [
-          { content: { [Sequelize.Op.ne]: null } },
-          { methodology: { [Sequelize.Op.ne]: null } },
-          { engagement: { [Sequelize.Op.ne]: null } },
-        ],
-      },
     });
   },
 

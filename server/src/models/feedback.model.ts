@@ -2,6 +2,7 @@ import { Model, DataTypes } from "sequelize";
 import { Sequelize } from "sequelize";
 
 class Feedback extends Model {
+  public readonly id!: string;
   public lessonId!: string;
   public studentId!: string;
   public anonymous!: boolean;
@@ -13,10 +14,14 @@ class Feedback extends Model {
   public static initialize(sequelize: Sequelize) {
     this.init(
       {
+        id: {
+          type: DataTypes.UUID,
+          defaultValue: DataTypes.UUIDV4,
+          primaryKey: true,  
+        },
         lessonId: {
           type: DataTypes.UUID,
           allowNull: false,
-          primaryKey: true,
           references: {
             model: "lessons",
             key: "id",
@@ -27,7 +32,6 @@ class Feedback extends Model {
         studentId: {
           type: DataTypes.UUID,
           allowNull: false,
-          primaryKey: true,
           references: {
             model: "users",
             key: "id",

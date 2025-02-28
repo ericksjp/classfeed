@@ -14,6 +14,6 @@ classRoutes.put("/:classId", auth, updateClass);
 classRoutes.patch("/:classId", auth, updateClassStatus);
 classRoutes.delete("/:classId", auth, deleteClass);
 classRoutes.use("/:classId/lesson",auth, lessonRoutes);
-classRoutes.use("/:classId/lesson/:lessonId", auth, feedbackRoutes);
+classRoutes.use("/:classId/lesson/:lessonId/feedback", auth, feedbackRoutes);
 
 export default classRoutes;
