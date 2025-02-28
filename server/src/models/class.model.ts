@@ -17,6 +17,9 @@ class Class extends Model {
   public location?: LocationType;
   public teacherId!: string;
 
+  public declare addUser: (user: User) => Promise<unknown>;
+  public declare removeUser: (user: User) => Promise<unknown>;
+
    // eslint-disable-next-line @typescript-eslint/no-explicit-any
    public static associate(models: any) {
     this.belongsToMany(models.User, {

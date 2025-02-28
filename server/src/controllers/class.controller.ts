@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { Class } from "../models";
+import { Class, User } from "../models";
 
 const allowedStatuses = ["Ativo", "Arquivado"];
 
@@ -152,4 +152,108 @@ export async function deleteClass(req: Request, res: Response) {
         console.error("Error deleting Class:", err);
         res.status(500).json({ message: "Internal Server Error" });
     }
+}
+
+export async function getStudents(req: Request, res: Response) {
+  const { classId } = req.params;
+  try {
+    const response = await Class.findByPk(classId, {
+      include: {
+        model: User,
+        attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
+        through: { attributes: [] }
+      },
+    });
+
+    res.status(200).json(response);
+  } catch (err) {
+    console.error("Error deleting Class:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function getStudent(req: Request, res: Response) {
+  const { classId } = req.params;
+  const { studentId } = req.params;
+  try {
+    const response = await Class.findByPk(classId, {
+      include: {
+        model: User,
+        attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
+        where: {
+          id: studentId
+        },
+        through: { attributes: [] }
+      },
+    });
+
+    res.status(200).json(response);
+  } catch (err) {
+    console.error("Error deleting Class:", err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function addStudent(req: Request, res: Response) {
+  const { classId } = req.params;
+  const { email } = req.body;
+  try {
+    const _class = await Class.findByPk(classId);
+    if (!_class) {
+      res.status(404).json({ message: "Class not found" });
+      return;
+    }
+
+    const student = await User.findOne({
+      where: { email },
+    });
+
+    if (!student) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const response = await _class.addUser(student);
+    if (!response) {
+      res.status(400).json({ message: "User already in the class" });
+      return
+    }
+    res.sendStatus(201);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+}
+
+export async function removeStudent(req: Request, res: Response) {
+  const { classId } = req.params;
+  const studentId = req.params.studentId || req.body.id
+  console.log("studentId: " + studentId)
+
+  try {
+    const _class = await Class.findByPk(classId);
+    if (!_class) {
+      res.status(404).json({ message: "Class not found" });
+      return;
+    }
+
+    const student = await User.findByPk(studentId);
+
+    if (!student) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    const response = await _class.removeUser(student);
+    console.log(response)
+    if (response === 0) {
+      res.status(400).json({ message: "User is not in the class" });
+      return
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 }
