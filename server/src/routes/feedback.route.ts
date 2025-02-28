@@ -7,5 +7,6 @@ const feedbackRoutes = Router({ mergeParams: true});
 feedbackRoutes.get("/",verifyUserClass, feedbackController.getFeedbacks);
 feedbackRoutes.get("/:feedbackId", verifyUserClass, feedbackController.getFeedbackById);
 feedbackRoutes.post("/", verifyUserClass, feedbackController.createFeedback);
+feedbackRoutes.delete("/:feedbackId", verifyUserClass, feedbackController.deleteFeedback);
 
 export default feedbackRoutes;
