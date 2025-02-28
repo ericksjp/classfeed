@@ -15,8 +15,8 @@ const UserInput = z.object({
     .trim()
     .url({ message: "Invalid URL" }),
 
-  dateOfBirth: z.date()
-    .refine(date => date <= new Date(), { message: "Date of birth must be in the past" }),
+  dateOfBirth: z.coerce.date()
+    .max(new Date(), { message: "Date of birth must be in the past" }),
 
   password: z.string()
     .trim()
