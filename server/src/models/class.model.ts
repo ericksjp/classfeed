@@ -19,6 +19,7 @@ class Class extends Model {
 
   public declare addUser: (user: User) => Promise<unknown>;
   public declare removeUser: (user: User) => Promise<unknown>;
+  public readonly Users?: User[]
 
    // eslint-disable-next-line @typescript-eslint/no-explicit-any
    public static associate(models: any) {
