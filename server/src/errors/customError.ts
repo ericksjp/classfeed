@@ -3,7 +3,7 @@ class CustomError<C extends string> extends Error {
   message: string
   code?: C
 
-  constructor(code: number, message: string, c: C) {
+  constructor(code: number, message: string, c?: C) {
     super();
     this.statusCode = code
     this.message = message
