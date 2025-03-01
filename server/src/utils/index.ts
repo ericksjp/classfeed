@@ -8,7 +8,7 @@ export function generateToken(str: string) {
   });
 }
 
-export function tryCatchWrapper(controller: (req: Request, res: Response, next?: NextFunction) => Promise<unknown | void> | void) {
+export function tryCatchWrapper(controller: (req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void) {
   return async function (req: Request, res: Response, next: NextFunction) {
     try {
       await controller(req, res, next);
@@ -18,16 +18,8 @@ export function tryCatchWrapper(controller: (req: Request, res: Response, next?:
   };
 }
 
-export function multiTryCatchWrapper(controllers: ((req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void)[]) {
-  return async function (req: Request, res: Response, next: NextFunction) {
-    for (const controller of controllers) {
-      try {
-        await controller(req, res, next);
-      } catch (error) {
-        return next(error);
-      }
-    }
-  };
+export function multiTryCatchWrapper(middlewares: ((req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void)[]) {
+  return middlewares.map((middleware) => tryCatchWrapper(middleware));
 }
 
 export function getErrorMessage(error: unknown) {

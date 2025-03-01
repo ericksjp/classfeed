@@ -1,76 +1,74 @@
 import { Request, Response } from "express";
 import { User } from "../models/";
 import { hashSync } from "bcryptjs";
+import { EntityNotFoundError, InternalError } from "../errors";
+import { UserInput } from "../schemas";
+import { ValidationError } from "../errors";
 
-export async function get(req: Request, res: Response) {
-  try {
-    const { id } = req.body
-    const user = await User.findByPk(id, {raw: true});
+async function get(req: Request, res: Response) {
+  const { id } = req.body;
+  const user = await User.findByPk(id, { raw: true });
 
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
-
-    res.status(200).json({ ...user, password: undefined });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+  if (!user) {
+    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
+
+  res.status(200).json({ ...user, password: undefined });
 }
 
-export async function remove(req: Request, res: Response) {
-  try {
-    const { id } = req.body
+async function remove(req: Request, res: Response) {
+  const { id } = req.body;
 
-    const result = await User.destroy({
-      where: {
-        id: id,
-      },
-    });
+  const result = await User.destroy({
+    where: { id },
+  });
 
-    if (result === 0) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
-
-    res.status(204).send();
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Internal Server Error" });
+  if (result === 0) {
+    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
+
+  res.status(204);
 }
 
-export async function update(req: Request, res: Response) {
-  try {
-    const { id } = req.body;
-    const user = await User.findByPk(id);
+async function update(req: Request, res: Response) {
+  const { email, name, dateOfBirth, password, profilePicture } = req.body;
+  const { error } = UserInput.partial().safeParse({
+    email,
+    name,
+    dateOfBirth,
+    password,
+    profilePicture,
+  });
 
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
-
-    const { email, name, dateOfBirth, profilePicture } = req.body;
-    let { password } = req.body;
-
-    if (password) {
-      password = hashSync(password, 10);
-    }
-
-    const { dataValues } = await user.update({
-      email,
-      name,
-      dateOfBirth,
-      profilePicture,
-      password,
-    });
-
-    res.status(200).json({ ...dataValues, password: undefined });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+  if (error) {
+    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
   }
+
+  const { id } = req.body;
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+  }
+
+  let hashPassword;
+  if (password) {
+    hashPassword = hashSync(password, 10);
+  }
+
+  const { dataValues: updatedUser } = await user.update({
+    email,
+    name,
+    dateOfBirth,
+    profilePicture,
+    password: hashPassword,
+  });
+
+  if (!updatedUser) {
+    throw new InternalError(500, "Cannot update user", "ERR_INTERNAL");
+  }
+
+  res.status(200).json({ ...updatedUser, password: undefined });
 }
 
 export default {
