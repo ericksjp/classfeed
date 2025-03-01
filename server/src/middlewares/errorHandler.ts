@@ -7,12 +7,22 @@ export default (err: unknown, req: Request, res: Response, next: NextFunction) =
 
   if (err instanceof CustomError) {
     res.status(err.statusCode).json({
-      err: {
+      error: {
         message: err.message,
         code: err.code,
       },
     });
     return;
+  }
+
+  // invalid json
+  if (err instanceof SyntaxError) {
+    res.status(400).json({
+      error: {
+        message: getErrorMessage(err),
+      },
+    });
+    return
   }
 
   res.status(500).json({

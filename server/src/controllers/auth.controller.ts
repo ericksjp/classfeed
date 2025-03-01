@@ -16,7 +16,7 @@ async function signup(req: Request, res: Response) {
   const existingUser = await User.findOne({ where: { email } });
 
   if (existingUser) {
-    throw new ConflictError(422, "User already exists", "ERR_CONFLICT");
+    throw new ConflictError(409, "User already exists", "ERR_CONFLICT");
   }
 
   const hashedPassword = hashSync(password, 10);
