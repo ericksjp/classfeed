@@ -4,6 +4,7 @@ import { hashSync } from "bcryptjs";
 import { EntityNotFoundError, InternalError } from "../errors";
 import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
+import { extractDefinedValues } from "../utils";
 
 async function get(req: Request, res: Response) {
   const { id } = req.body;
@@ -27,18 +28,23 @@ async function remove(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  res.status(204);
+  res.sendStatus(204);
 }
 
 async function update(req: Request, res: Response) {
-  const { email, name, dateOfBirth, password, profilePicture } = req.body;
-  const { error } = UserInput.partial().safeParse({
-    email,
-    name,
-    dateOfBirth,
-    password,
-    profilePicture,
-  });
+  const updateData = extractDefinedValues({
+    email: req.body.email,
+    name: req.body.name,
+    dateOfBirth: req.body.dateOfBirth,
+    password: req.body.password,
+    profilePicture: req.body.profilePicture,
+  })
+
+  const { error } = UserInput.partial().safeParse(updateData);
+
+  if (updateData.password) {
+    updateData.password = hashSync(updateData.password, 10)
+  }
 
   if (error) {
     throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
@@ -51,18 +57,7 @@ async function update(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  let hashPassword;
-  if (password) {
-    hashPassword = hashSync(password, 10);
-  }
-
-  const { dataValues: updatedUser } = await user.update({
-    email,
-    name,
-    dateOfBirth,
-    profilePicture,
-    password: hashPassword,
-  });
+  const { dataValues: updatedUser } = await user.update(updateData);
 
   if (!updatedUser) {
     throw new InternalError(500, "Cannot update user", "ERR_INTERNAL");

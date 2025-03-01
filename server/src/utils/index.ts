@@ -37,3 +37,15 @@ export function getErrorMessage(error: unknown) {
 
   return "An error occured"
 }
+
+export function extractDefinedValues<T extends object>(obj: T): Partial<T> {
+  const result: Partial<T> = {};
+
+  (Object.keys(obj) as (keyof T)[]).forEach((key) => {
+    if (obj[key] !== undefined) {
+      result[key] = obj[key];
+    }
+  });
+
+  return result;
+}

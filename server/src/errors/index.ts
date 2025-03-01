@@ -2,6 +2,7 @@ import CustomError from "./customError";
 
 class EntityNotFoundError extends CustomError<ErrorCode> {}
 class ValidationError extends CustomError<ErrorCode> {}
+class ParamError extends CustomError<ErrorCode> {}
 class AuthorizationError extends CustomError<ErrorCode> {}
 class AuthenticationError extends CustomError<ErrorCode> {}
 class TokenError extends CustomError<ErrorCode> {}
@@ -13,6 +14,7 @@ class InternalError extends CustomError<ErrorCode> {}
 export {
   EntityNotFoundError,
   ValidationError,
+  ParamError,
   AuthorizationError,
   AuthenticationError,
   TokenError,
