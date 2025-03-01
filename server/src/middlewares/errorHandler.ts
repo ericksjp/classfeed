@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import CustomError from "../errors/customError";
+import { getErrorMessage } from "../utils";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default (err: unknown, req: Request, res: Response, next: NextFunction) => {
@@ -16,7 +17,7 @@ export default (err: unknown, req: Request, res: Response, next: NextFunction) =
 
   res.status(500).json({
     error: {
-      message: "An unexpected error occurred. Please try again later.",
+      message: getErrorMessage(err) || "An unexpected error occurred. Please try again later.",
     },
   });
 };
