@@ -70,18 +70,6 @@ class Class extends Model {
         location: {
           type: DataTypes.GEOMETRY("POINT"),
           allowNull: true,
-          get() {
-            const location = this.getDataValue("location");
-            return location ? location.coordinates : null;
-          },
-          set(val: [number, number] | null) {
-            if (val === null) return this.setDataValue("location", null);
-
-            this.setDataValue("location", {
-              type: "POINT",
-              coordinates: val,
-            });
-          },
         },
         teacherId: {
           type: DataTypes.UUID,

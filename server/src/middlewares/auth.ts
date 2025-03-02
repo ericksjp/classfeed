@@ -1,20 +1,25 @@
 import { Response, Request, NextFunction } from 'express'
 import authConfig from '../config/authConfig';
-import jwt, { JwtPayload } from 'jsonwebtoken';
-import { TokenError } from '../errors';
+import jwt from 'jsonwebtoken';
+import type { JwtPayload } from 'jsonwebtoken';
 
 
-export default function (req: Request, _: Response, next: NextFunction) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) throw new TokenError(401, "Token doesn't exist", "ERR_TOKEN");
-
-  const [, token] = authHeader.split(" ");
-  jwt.verify(token, authConfig.secret, (error, decoded) => {
-    if (error) {
-      throw new TokenError(401, "Invalid Token", "ERR_TOKEN");
+export default function(req: Request, res: Response, next: NextFunction) {
+    const authHeader = req.headers.authorization;
+    console.log("Oi");
+    if(!authHeader){
+        res.status(401).json({error: "Token doesn't exist"});
+        return;
     }
 
-    req.body.id = (decoded as JwtPayload).id;
-    next();
-  });
+    const [, token] = authHeader.split(' ');
+    try {
+        const decoded = jwt.verify(token, authConfig.secret) as JwtPayload;
+        req.body.id = decoded.id;
+        next();
+        return;
+    } catch {
+        res.status(401).json({error: "Invalid token"});
+        return;
+    }
 }

@@ -1,122 +1,96 @@
 import {Request, Response} from "express";
-import {Class, Lesson} from "../models"
-import { EntityNotFoundError, ValidationError } from "../errors";
-import { isUuidValid } from "../utils/validation";
-import { LessonInput } from "../schemas";
-import { extractDefinedValues } from "../utils";
+import {Lesson} from "../models"
 
-export async function getlessons(req: Request, res: Response) {
-  const classInstance = req.body.classInstance as Class;
-  if (!classInstance) {
-    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
-  }
-
-  const lessons = await Lesson.findAll({
-    where: { classId: classInstance.id },
-    raw: true,
-  });
-  res.status(200).json(lessons);
+export async function getlessons(req:Request, res:Response){
+    const {classId} = req.params;
+    try {
+        const lessons = await Lesson.findAll({
+            where:{classId}, 
+            raw:true,
+        });
+        res.status(200).json(lessons);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
 }
 
-export async function getLessonById(req: Request, res: Response) {
-  const classInstance = req.body.classInstance as Class;
-  if (!classInstance) {
-    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
-  }
+export async function getLessonById(req:Request, res:Response){
+    const {classId} = req.params;
+    const {lessonId} = req.params;
+    try {
+        const lesson = await Lesson.findOne({
+            where:{classId, id:lessonId},
+            raw: true,
+        })
+        if(!lesson){
+            res.status(404).json({message:"Lesson not found"});
+            return;
+        }
+        res.status(200).json(lesson);
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
 
-  const { lessonId } = req.params;
-  if (!isUuidValid(lessonId)) {
-    throw new ValidationError(400, "Invalid lessonId", "ERR_VALID");
-  }
-
-  const lesson = await Lesson.findOne({
-    where: { classId: classInstance.id, id: lessonId },
-    raw: true,
-  });
-
-  if (!lesson) {
-    throw new ValidationError(404, "Lesson not found", "ERR_NF");
-  }
-
-  res.status(200).json(lesson);
 }
 
-export async function createLesson(req: Request, res: Response) {
-  const classInstance = req.body.classInstance as Class;
-  if (!classInstance) {
-    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
-  }
+export async function createLesson(req:Request, res:Response){
+    const {classId} = req.params
+    const {title}= req.body;
+    try {
+        const newLesson = await Lesson.create({
+            title,
+            classId,
+        });
+        res.status(201).json(newLesson);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
 
-  const { title, dateTime } = req.body;
-  const { error } = LessonInput.safeParse({ title, classId: classInstance.id, dateTime });
-
-  if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
-  }
-
-  const newLesson = await Lesson.create({
-    title,
-    classId: classInstance.id,
-    dateTime,
-  });
-  res.status(200).json(newLesson);
 }
 
 export async function updateLesson(req:Request, res:Response){
-  const classInstance = req.body.classInstance as Class;
-  if (!classInstance) {
-    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
-  }
+    const {lessonId} = req.params;
+    try {
+        const {title} = req.body;
+        const [updatedData] = await Lesson.update(
+            {title},
+            {where:{
+                id: lessonId,
+            }}
+        );
+        if(updatedData === 0){
+            res.status(404).json({message: "Lesson not found"});
+            return;
+        }
+        res.status(200).json(await Lesson.findByPk(lessonId));
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
 
-  const { lessonId } = req.params;
-
-  if (!isUuidValid(lessonId)) {
-    throw new ValidationError(400, "Invalid lessonId", "ERR_BAD_REQUEST");
-  }
-
-  const updateData = extractDefinedValues({
-    title: req.body.title,
-    dateTime: req.body.dateTime,
-  })
-
-  const { error }= LessonInput.partial().safeParse(updateData);
-
-  if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
-  }
-
-  const updated = await Lesson.update(updateData, {
-    where: { id: lessonId, classId: classInstance.id },
-    returning: ["id", "title", "classId", "dateTime", ]
-  });
-
-  if(updated[0] === 0){
-    throw new EntityNotFoundError(404, "Lesson not Found", "ERR_NF");
-  }
-
-  res.status(200).json(updated[1][0]);
 }
 
-export async function deleteLesson(req: Request, res: Response) {
-  const classInstance = req.body.classInstance as Class;
-  if (!classInstance) {
-    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
-  }
-
-  const { lessonId } = req.params;
-
-  if (!isUuidValid(lessonId)) {
-    throw new ValidationError(400, "Invalid lessonId", "ERR_BAD_REQUEST");
-  }
-
-  const count = await Lesson.destroy({
-    where: {
-      id: lessonId,
-      classId: classInstance.id,
-    },
-  });
-
-  if (count === 0) throw new EntityNotFoundError(404, "Lesson not Found", "ERR_NF");
-
-  res.sendStatus(204);
+export async function deleteLesson(req:Request, res:Response){
+    const {lessonId} = req.params;
+    try {
+        const deletedData = await Lesson.destroy({
+            where:{
+                id: lessonId,
+            },
+        })
+        if(deletedData === 0){
+            res.status(404).json({message: "Lesson not found"});
+            return;
+        }
+        res.status(200).json({message: "Lesson delete with success"});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({message: "Internal Server Error"});
+    }
 }
+
+

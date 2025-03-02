@@ -1,12 +1,12 @@
 import express from "express"
 import rootRouter from "./routes";
-import errorHandler from "./middlewares/errorHandler";
+import notFoundError from "./middlewares/not-found-error";
 
 const app = express();
 app.use(express.json())
 
 app.use('/api', rootRouter)
 
-app.use(errorHandler);
+app.use(notFoundError);
 
 export default app
