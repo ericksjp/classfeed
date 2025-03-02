@@ -1,259 +1,238 @@
 import { Request, Response } from "express";
 
 import { Class, User } from "../models";
-
-const allowedStatuses = ["Ativo", "Arquivado"];
+import { ClassInput, UserInput } from "../schemas";
+import { ConflictError, EntityNotFoundError, ParamError, ValidationError } from "../errors";
+import { isUuidValid } from "../utils/validation";
+import { extractDefinedValues } from "../utils";
 
 export async function createClass(req: Request, res: Response) {
-    const { id, name, subject, institution, status, location } = req.body;
+  const { id: teacherId, name, subject, institution, status, location } = req.body;
+  const { error } = ClassInput.safeParse({ teacherId, name, subject, institution, status, location });
 
-    try {
-        if(!allowedStatuses.includes(status)) {
-            res.status(400).json({ message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}` });
-            return;
-        }
+  if (error) {
+    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+  }
 
-        const newClass = await Class.create({
-            name,
-            subject,
-            institution,
-            status,
-            location,
-            teacherId: id
-        });
+  const newClass = await Class.create({
+    name,
+    subject,
+    institution,
+    status,
+    location,
+    teacherId
+  });
 
-        res.status(201).json(newClass);
-    } catch(err) {
-        console.error("Error creating Class:", err);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+  res.status(201).json(newClass);
 }
 
-// get the classes of a teacher
 export async function getClasses(req: Request, res: Response) {
   const { id } = req.body;
-  try {
-    const classes = await Class.findAll({
-      where: { teacherId: id },
-      raw: true,
-    });
-    res.status(200).json(classes);
-  } catch (err) {
-    console.error("Error getting Classes:", err);
-    res.status(500).json({ message: "Internal Server Error" });
-  }
+  const role = (req.query.role as string) || undefined;
+  const classes: { teacherClasses?: unknown[]; studentClasses?: unknown[] } = {};
+
+  const fetchAsTeacher = !role || role === "teacher";
+  const fetchAsStudent = !role || role === "student";
+
+  if (!fetchAsStudent && !fetchAsTeacher) throw new ParamError( 400, "Invalid role value. Accepted values: 'teacher' or 'student'", "ERR_BAD_REQUEST");
+
+  if (fetchAsTeacher) classes.teacherClasses = await getTeacherClasses(id);
+  if (fetchAsStudent) classes.studentClasses = await getStudentClasses(id);
+
+  res.status(200).json(classes);
 }
 
-// get a class of a teacher by its ID
 export async function getClassById(req: Request, res: Response) {
-    const { classId } = req.params;
-    const { id } = req.body;
-    try {
-    const _class = await Class.findOne({
-        where: { id: classId, teacherId: id },
-        raw: true,
-    });
+  const classInstance = req.body.classInstance as Class;
+  if (!classInstance) {
+    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
+  }
 
-      if (!_class) {
-        res.status(404).json({ message: "Class not found" });
-        return;
-      }
-
-      res.status(200).json(_class);
-    } catch (err) {
-      console.error("Error getting Classes:", err);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
+  const { dataValues: _class } = classInstance;
+  const teacher = await User.findByPk(_class.teacherId, {
+    raw: true,
+    attributes: ["name", "id", "email", "profilePicture"]
+  })
+  res.status(200).json({ ..._class, teacherId: undefined, teacher });
+  return;
 }
 
-// update a class of a teacher by its ID
 export async function updateClass(req: Request, res: Response) {
-    const {classId} = req.params;
-    const { id, name, subject, institution, status, location } = req.body;
+  const classInstance = req.body.classInstance as Class;
+  if (!classInstance) {
+    throw new EntityNotFoundError(404, "Class not found", "ERR_NF")
+  }
 
-    try {
-        if(!allowedStatuses.includes(status)) {
-            res.status(400).json({ message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}` });
-            return;
-        }
+  // prevent sequelize from updating undefined values
+  const updateData = extractDefinedValues({
+    name: req.body.name,
+    subject: req.body.subject,
+    institution: req.body.institution,
+    status: req.body.status,
+    location: req.body.location,
+  })
 
-        const [updatedRows] = await Class.update({
-            name,
-            subject,
-            institution,
-            status,
-            location
-        },
-        {
-            where: {teacherId: id, id: classId}
-        }
-        );
+  const {error} = ClassInput.partial().safeParse(updateData)
 
-        if(updatedRows === 0) {
-            res.status(404).json({ message: `Failed to update the class with the given ID (${classId})` });
-            return;
-        }
+  if (error) {
+    throw new ValidationError(400, error.errors[0].message, "ERR_VALID")
+  }
 
-        res.status(200).json(await Class.findByPk(classId));
-    } catch(err) {
-        console.error("Error updating Class:", err);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+  classInstance.set(updateData);
+  await classInstance.save();
+
+  res.status(200).json(classInstance);
 }
 
-// update the status of a class of a teacher by its ID
 export async function updateClassStatus(req: Request, res: Response) {
-    const { classId } = req.params;
-    const { id, status } = req.body;
-
-    try {
-        if(!allowedStatuses.includes(status)) {
-            res.status(400).json({ message: `Invalid status. Allowed values: ${allowedStatuses.join(', ')}` });
-            return;
-        }
-
-        const [updatedRows] = await Class.update({
-            status
-        },
-        {
-            where: { teacherId: id, id: classId }
-        }
-        );
-
-        if(updatedRows === 0) {
-            res.status(404).json({ message: `Failed to update the class with the given ID (${classId})` });
-            return;
-        }
-
-        res.status(200).json(await Class.findByPk(classId));
-    } catch(err) {
-        console.error("Error updating Class status:", err);
-        res.status(500).json({ message: "Internal Server Error" });
+    const classInstance = req.body.classInstance as Class;
+    if (!classInstance) {
+      throw new EntityNotFoundError(404, "Class not found", "ERR_NF")
     }
-}
 
-// delete a class of a teacher by its ID
+    const { status } = req.body;
+    const {error} = ClassInput.partial().safeParse({status})
+
+    if (error) {
+      throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+    }
+
+    classInstance.set({status})
+    await classInstance.save()
+
+    res.status(200).json(classInstance);
+  }
+
 export async function deleteClass(req: Request, res: Response) {
-    const { classId } = req.params;
-    const { id } = req.body;
+  const classInstance = req.body.classInstance as Class;
+  if (!classInstance) {
+    throw new EntityNotFoundError(404, "Class not found", "ERR_NF")
+  }
 
-    try {
-        const deletedRows = await Class.destroy({
-            where: { teacherId: id, id: classId }
-        });
+  await classInstance.destroy();
 
-        if(deletedRows === 0) {
-            res.status(404).json({ message: `Failed to delete the class with the given ID (${classId})` });
-            return;
-        }
-
-        res.status(200).json({ message: `The class with ID (${classId}) has been successfully deleted` })
-    } catch(err) {
-        console.error("Error deleting Class:", err);
-        res.status(500).json({ message: "Internal Server Error" });
-    }
+  res.status(204).send()
 }
 
 export async function getStudents(req: Request, res: Response) {
-  const { classId } = req.params;
-  try {
-    const response = await Class.findByPk(classId, {
-      include: {
-        model: User,
-        attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
-        through: { attributes: [] }
-      },
-    });
-
-    res.status(200).json(response);
-  } catch (err) {
-    console.error("Error deleting Class:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+  const classInstance = req.body.classInstance as Class;
+  if (!classInstance) {
+    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
   }
+
+  const response = await Class.findByPk(classInstance.id, {
+    include: {
+      model: User,
+      attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
+      through: { attributes: [] },
+    },
+  });
+
+  res.status(200).json(response?.Users || []);
 }
 
 export async function getStudent(req: Request, res: Response) {
-  const { classId } = req.params;
-  const { studentId } = req.params;
-  try {
-    const response = await Class.findByPk(classId, {
-      include: {
-        model: User,
-        attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
-        where: {
-          id: studentId
-        },
-        through: { attributes: [] }
-      },
-    });
-
-    res.status(200).json(response);
-  } catch (err) {
-    console.error("Error deleting Class:", err);
-    res.status(500).json({ message: "Internal Server Error" });
+  const classInstance = req.body.classInstance as Class;
+  if (!classInstance) {
+    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
   }
+
+  const { studentId } = req.params;
+  const response = await Class.findByPk(classInstance.id, {
+    include: {
+      model: User,
+      attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
+      where: {
+        id: studentId,
+      },
+      through: { attributes: [] },
+      required: true,
+    },
+  });
+
+  if (!response || !response.Users || response.Users.length === 0) {
+    throw new EntityNotFoundError(404, "Student not found", "ERR_NF");
+  }
+
+  res.status(200).json(response.Users[0]);
 }
 
 export async function addStudent(req: Request, res: Response) {
-  const { classId } = req.params;
-  const { email } = req.body;
-  try {
-    const _class = await Class.findByPk(classId);
-    if (!_class) {
-      res.status(404).json({ message: "Class not found" });
-      return;
-    }
-
-    const student = await User.findOne({
-      where: { email },
-    });
-
-    if (!student) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
-
-    const response = await _class.addUser(student);
-    if (!response) {
-      res.status(400).json({ message: "User already in the class" });
-      return
-    }
-    res.sendStatus(201);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+  const classInstance = req.body.classInstance as Class;
+  if (!classInstance) {
+    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
   }
+
+  const { email } = req.body;
+  const { error } = UserInput.partial().safeParse({ email });
+
+  if (error) {
+    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+  }
+
+  const student = await User.findOne({ where: { email } });
+  if (!student) {
+    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+  }
+
+  const response = await classInstance.addUser(student);
+  if (!response) {
+    throw new ConflictError(409, "User already in the class", "ERR_CONFLICT");
+  }
+
+  res.sendStatus(200);
 }
 
 export async function removeStudent(req: Request, res: Response) {
-  const { classId } = req.params;
-  const studentId = req.params.studentId || req.body.id
-  console.log("studentId: " + studentId)
-
-  try {
-    const _class = await Class.findByPk(classId);
-    if (!_class) {
-      res.status(404).json({ message: "Class not found" });
-      return;
-    }
-
-    const student = await User.findByPk(studentId);
-
-    if (!student) {
-      res.status(404).json({ message: "User not found" });
-      return;
-    }
-
-    const response = await _class.removeUser(student);
-    console.log(response)
-    if (response === 0) {
-      res.status(400).json({ message: "User is not in the class" });
-      return
-    }
-
-    res.sendStatus(200);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Internal Server Error" });
+  const classInstance = req.body.classInstance as Class;
+  if (!classInstance) {
+    throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
   }
+
+  let studentIntance = req.body.userInstance as User | null;
+  console.log(studentIntance)
+
+  if (!studentIntance) {
+
+    const studentId = req.params.studentId;
+
+    if (!isUuidValid(studentId)) {
+      throw new ValidationError(400, "Invalid userId", "ERR_VALID");
+    }
+
+    studentIntance = await User.findByPk(studentId);
+
+    if (!studentIntance) {
+      throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+    }
+  }
+
+  const removeCount = await classInstance.removeUser(studentIntance);
+  if (removeCount === 0) {
+    throw new EntityNotFoundError(404, "User not in the class", "ERR_NF");
+  }
+
+  res.sendStatus(200);
+}
+
+/*-------- utils -------------*/
+
+async function getTeacherClasses(userId: string) {
+  return await Class.findAll({
+    where: { teacherId: userId },
+    raw: true,
+  });
+}
+
+async function getStudentClasses(userId: string) {
+  return await Class.findAll({
+    raw: true,
+    attributes: ['id', 'name', 'subject', 'institution', 'status', 'location', 'teacherId'],
+    include: {
+      model: User,
+      attributes: [],
+      where: { id: userId },
+      required: true,
+    },
+  });
 }

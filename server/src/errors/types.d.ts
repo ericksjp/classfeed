@@ -1,0 +1,13 @@
+type ErrorCode =
+  | "ERR_NF"
+  | "ERR_VALID"
+  | "ERR_TOKEN"
+  | "ERR_AUTH"
+  | "ERR_FORBIDDEN"
+  | "ERR_INTERNAL"
+  | "ERR_TIMEOUT"
+  | "ERR_CONFLICT"
+  | "ERR_BAD_REQUEST"
+  | "ERR_UNAVAILABLE"
+  | "ERR_NOT_IMPLEMENTED"
+  | "ERR_CONFLICT"
