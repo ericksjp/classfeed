@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { addStudent, createClass, deleteClass, getClassById, getClasses, getStudent, getStudents, removeStudent, updateClass, updateClassStatus } from "../controllers/class.controller";
 import Auth from "../middlewares/auth";
-// import lessonRoutes from "./lesson.route";
+import lessonRoutes from "./lesson.route";
 // import feedbackRoutes from "./feedback.route";
 import { isUserPartOfClass, isUserStudent, isUserTeacher } from "../middlewares/verify";
 import { multiTryCatchWrapper } from "../utils";
@@ -25,7 +25,9 @@ classRoutes.get("/:classId/student/:studentId", multiTryCatchWrapper([Auth, isUs
 classRoutes.post("/:classId/student", multiTryCatchWrapper([Auth, isUserTeacher, addStudent]))
 classRoutes.delete("/:classId/student/:studentId", multiTryCatchWrapper([Auth, isUserTeacher, removeStudent]))
 
-// classRoutes.use("/:classId/lesson",multiTryCatchWrapper([Auth, lessonRoutes]));
-// classRoutes.use("/:classId/lesson/:lessonId/feedback", multiTryCatchWrapper([Auth, feedbackRoutes]));
+// nested routes
+classRoutes.use("/:classId/lesson", lessonRoutes);
+
+// classRoutes.use("/:classId/lesson/:lessonId/feedback", feedbackRoutes);
 
 export default classRoutes;
