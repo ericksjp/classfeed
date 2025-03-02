@@ -1,10 +1,13 @@
 import { Model, DataTypes, Sequelize } from "sequelize";
+import Feedback from "./feedback.model";
 
 class Lesson extends Model {
   public readonly id!: string;
   public name!: string;
   public dateTime!: Date;
   public classId!: string;
+
+  public readonly Feedbacks?: Feedback[]
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static associate(models: any) {
