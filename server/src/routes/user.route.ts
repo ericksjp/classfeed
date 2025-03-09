@@ -10,5 +10,6 @@ userRoutes.get("/", multiTryCatchWrapper([Auth, UserController.get]));
 userRoutes.delete("/", multiTryCatchWrapper([Auth, UserController.remove]));
 userRoutes.patch("/", multiTryCatchWrapper([Auth, UserController.update]));
 userRoutes.patch("/profilePicture", multiTryCatchWrapper([upload.single("image"), Auth, UserController.updateProfilePicture]));
+userRoutes.get("/profilePicture", multiTryCatchWrapper([Auth, UserController.getProfilePicture]));
 
 export default userRoutes;
