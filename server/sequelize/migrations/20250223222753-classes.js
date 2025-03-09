@@ -72,7 +72,7 @@ module.exports = {
 
   async down (queryInterface, Sequelize) {
 
-    await queryInterface.removeConstraint("user_class", "user_class_primary_key");
+    await queryInterface.removeConstraint("user_class", "user_class_userId_classId_pk");
 
     await queryInterface.dropTable("user_class");
 

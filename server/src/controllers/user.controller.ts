@@ -1,7 +1,9 @@
+import fs from "fs";
+import path from "path";
 import { Request, Response } from "express";
 import { User } from "../models/";
 import { hashSync } from "bcryptjs";
-import { EntityNotFoundError, InternalError } from "../errors";
+import { EntityNotFoundError, InternalError, ParamError } from "../errors";
 import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
 import { extractDefinedValues } from "../utils";
@@ -66,8 +68,35 @@ async function update(req: Request, res: Response) {
   res.status(200).json({ ...updatedUser, password: undefined });
 }
 
+async function updateProfilePicture(req: Request, res: Response) {
+  const { id } = req.body;
+  const file = req.file;
+
+  const user = await User.findByPk(id);
+
+  if(!user) {
+    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+  }
+
+  if(!file) {
+    throw new ParamError(400, "No image uploaded", "ERR_NF");
+  }
+
+  if(user.profilePicture !== "uploads/default_profile_picture.png") {
+    const oldImagePath = path.resolve(user.profilePicture);
+    fs.unlinkSync(oldImagePath);
+  }
+
+  const { dataValues: updatedUser } = await user.update({
+    profilePicture: file.path
+  });
+
+  res.status(200).json({ ...updatedUser, password: undefined });
+}
+
 export default {
   get,
   update,
   remove,
+  updateProfilePicture
 }

@@ -24,7 +24,8 @@ module.exports = {
 
       profilePicture: {
         type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: "uploads/default_profile_picture.png"
       },
 
       dateOfBirth: {

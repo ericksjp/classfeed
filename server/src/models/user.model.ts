@@ -6,7 +6,7 @@ class User extends Model {
   public readonly id!: string;
   public name!: string;
   public email!: string;
-  public profilePicture?: string;
+  public profilePicture!: string;
   public dateOfBirth!: Date;
   public password!: string;
 
@@ -61,7 +61,8 @@ class User extends Model {
         },
         profilePicture: {
           type: DataTypes.STRING,
-          allowNull: true,
+          allowNull: false,
+          defaultValue: "uploads/default_profile_picture.png"
         },
         dateOfBirth: {
           type: DataTypes.DATE,
