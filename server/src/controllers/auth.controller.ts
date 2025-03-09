@@ -6,7 +6,7 @@ import { UserInput } from "../schemas";
 import { AuthorizationError, ConflictError, EntityNotFoundError, InternalError, ValidationError } from "../errors";
 
 async function signup(req: Request, res: Response) {
-  const { email, name, password, dateOfBirth, profilePicture } = req.body;
+  const { email, name, password, dateOfBirth } = req.body;
   const { error } = UserInput.safeParse(req.body);
 
   if (error) {
@@ -22,7 +22,7 @@ async function signup(req: Request, res: Response) {
   const hashedPassword = hashSync(password, 10);
 
   const {dataValues: user} = await User.create(
-    { email, name, password: hashedPassword, dateOfBirth, profilePicture },
+    { email, name, password: hashedPassword, dateOfBirth },
   );
 
   if (!user) {

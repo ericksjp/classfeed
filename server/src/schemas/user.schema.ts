@@ -11,10 +11,6 @@ const UserInput = z.object({
     .email({ message: "Invalid email" })
     .max(255, { message: "Name must be at most 255 characters long" }),
 
-  profilePicture: z.string()
-    .trim()
-    .url({ message: "Invalid URL" }),
-
   dateOfBirth: z.coerce.date()
     .max(new Date(), { message: "Date of birth must be in the past" }),
 
