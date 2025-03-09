@@ -94,9 +94,28 @@ async function updateProfilePicture(req: Request, res: Response) {
   res.status(200).json({ ...updatedUser, password: undefined });
 }
 
+async function getProfilePicture(req: Request, res: Response) {
+  const { id } = req.body;
+
+  const user = await User.findByPk(id);
+
+  if(!user) {
+    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+  }
+
+  if (!user.profilePicture) {
+    throw new EntityNotFoundError(404, "Profile picture not found", "ERR_NF");
+  }
+
+  const imageUrl = `http://localhost:${process.env.SERVER_PORT || 3000}/${user.profilePicture}`;
+
+  res.status(200).json({ imageUrl });
+}
+
 export default {
   get,
   update,
   remove,
-  updateProfilePicture
+  updateProfilePicture,
+  getProfilePicture
 }
