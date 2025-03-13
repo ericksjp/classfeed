@@ -7,6 +7,7 @@ import { EntityNotFoundError, InternalError, ParamError } from "../errors";
 import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
 import { extractDefinedValues } from "../utils";
+import { buildImageUrl } from "../utils/imageUrl";
 
 async function get(req: Request, res: Response) {
   const { id } = req.body;
@@ -16,7 +17,8 @@ async function get(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  res.status(200).json({ ...user, password: undefined });
+  res.status(200).json({ ...user, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture), 
+    password: undefined });
 }
 
 async function remove(req: Request, res: Response) {
@@ -38,8 +40,7 @@ async function update(req: Request, res: Response) {
     email: req.body.email,
     name: req.body.name,
     dateOfBirth: req.body.dateOfBirth,
-    password: req.body.password,
-    profilePicture: req.body.profilePicture,
+    password: req.body.password
   })
 
   const { error } = UserInput.partial().safeParse(updateData);
@@ -65,7 +66,8 @@ async function update(req: Request, res: Response) {
     throw new InternalError(500, "Cannot update user", "ERR_INTERNAL");
   }
 
-  res.status(200).json({ ...updatedUser, password: undefined });
+  res.status(200).json({ ...updatedUser, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture), 
+    password: undefined });
 }
 
 async function updateProfilePicture(req: Request, res: Response) {
@@ -91,7 +93,8 @@ async function updateProfilePicture(req: Request, res: Response) {
     profilePicture: file.path
   });
 
-  res.status(200).json({ ...updatedUser, password: undefined });
+  res.status(200).json({ ...updatedUser, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture),
+    password: undefined });
 }
 
 async function getProfilePicture(req: Request, res: Response) {
@@ -107,7 +110,7 @@ async function getProfilePicture(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "Profile picture not found", "ERR_NF");
   }
 
-  const imageUrl = `http://localhost:${process.env.SERVER_PORT || 3000}/${user.profilePicture}`;
+  const imageUrl = buildImageUrl(req.protocol, req.hostname, user.profilePicture);
 
   res.status(200).json({ imageUrl });
 }
