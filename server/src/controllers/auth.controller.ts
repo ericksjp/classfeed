@@ -4,6 +4,7 @@ import { compareSync, hashSync } from "bcryptjs";
 import { generateToken } from "../utils";
 import { UserInput } from "../schemas";
 import { AuthorizationError, ConflictError, EntityNotFoundError, InternalError, ValidationError } from "../errors";
+import { buildImageUrl } from "../utils/imageUrl";
 
 async function signup(req: Request, res: Response) {
   const { email, name, password, dateOfBirth } = req.body;
@@ -31,7 +32,7 @@ async function signup(req: Request, res: Response) {
 
   res.status(201).json({
     message: "User created successfully",
-    user: {...user, password: undefined},
+    user: {...user, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture),password: undefined},
     token: generateToken(user.id)
   });
 }
