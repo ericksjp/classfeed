@@ -7,7 +7,8 @@ interface ConfigTs {
     production: Options;
 }
 
-const { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, NODE_ENV } = process.env
+const { DB_USER, DB_PASSWORD, DB_NAME, DOCKER_DB_HOST, NODE_ENV } = process.env
+const DB_HOST = DOCKER_DB_HOST || process.env.DB_HOST;
 const env = (NODE_ENV || 'development') as keyof ConfigTs;
 
 const configDB: ConfigTs = {

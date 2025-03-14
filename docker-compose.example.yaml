@@ -3,13 +3,10 @@ services:
     build: ./server
     ports:
       - 3001:3001
-    environment:
-      - SERVER_PORT=3001
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=classfeed
-      - DB_HOST=db
-      - JWT_SECRET=123456
+    env_file: ./server/.env
+    enviroment:
+      DOCKER_DB_HOST: db
+      FILE_STORAGE_PATH: /opt/bucket
     volumes:
       - ./server:/opt/app
       - /home/erick/.local/state/cl_bucket:/opt/bucket
