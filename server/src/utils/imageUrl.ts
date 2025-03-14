@@ -1,3 +1,3 @@
-export function buildImageUrl(protocol: string, host: string, imagePath: string) {
-    return `${protocol}://${host}:${process.env.SERVER_PORT || 3000}/${imagePath}`;
+export function buildImageUrl(protocol: string, host: string, filename: string) {
+    return `${protocol}://${host}:${process.env.SERVER_PORT || 3000}/uploads/${filename}`;
 }

@@ -72,7 +72,7 @@ async function update(req: Request, res: Response) {
 
 async function updateProfilePicture(req: Request, res: Response) {
   const { id } = req.body;
-  const file = req.file;
+  const filename = req.file?.filename;
 
   const user = await User.findByPk(id);
 
@@ -80,17 +80,17 @@ async function updateProfilePicture(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  if(!file) {
+  if(!filename) {
     throw new ParamError(400, "No image uploaded", "ERR_NF");
   }
 
-  if(user.profilePicture !== "uploads/default_profile_picture.png") {
-    const oldImagePath = path.resolve(user.profilePicture);
+  if(user.profilePicture !== "default_profile_picture.png") {
+    const oldImagePath = `${process.env.FILE_STORAGE_PATH}/${user.profilePicture}`
     fs.unlinkSync(oldImagePath);
   }
 
   const { dataValues: updatedUser } = await user.update({
-    profilePicture: file.path
+    profilePicture: filename
   });
 
   res.status(200).json({ ...updatedUser, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture),

@@ -62,7 +62,7 @@ class User extends Model {
         profilePicture: {
           type: DataTypes.STRING,
           allowNull: false,
-          defaultValue: "uploads/default_profile_picture.png"
+          defaultValue: "default_profile_picture.png"
         },
         dateOfBirth: {
           type: DataTypes.DATE,
