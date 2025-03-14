@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { User } from "../models";
 import { compareSync, hashSync } from "bcryptjs";
-import { generateToken } from "../utils";
+import { extractZodErrors, generateToken } from "../utils";
 import { UserInput } from "../schemas";
-import { AuthorizationError, ConflictError, EntityNotFoundError, InternalError, ValidationError } from "../errors";
+import { AuthorizationError, ConflictError, InternalError, ValidationError } from "../errors";
 import { buildImageUrl } from "../utils/imageUrl";
 
 async function signup(req: Request, res: Response) {
@@ -11,7 +11,7 @@ async function signup(req: Request, res: Response) {
   const { error } = UserInput.safeParse(req.body);
 
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID")
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }
 
   const existingUser = await User.findOne({ where: { email } });
@@ -32,7 +32,7 @@ async function signup(req: Request, res: Response) {
 
   res.status(201).json({
     message: "User created successfully",
-    user: {...user, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture),password: undefined},
+    user: {...user, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture), password: undefined},
     token: generateToken(user.id)
   });
 }
@@ -40,20 +40,14 @@ async function signup(req: Request, res: Response) {
 async function login(req: Request, res: Response) {
   const { email, password } = req.body;
 
-  const { error } = UserInput.partial().safeParse({email, password});
+  const { error } = UserInput.pick({email: true, password: true}).safeParse({email, password});
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }
 
   const user = await User.findOne({ where: { email }, raw: true });
-  if (!user) {
-    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
-  }
-
-  const authorized = compareSync(password, user.password);
-
-  if (!authorized) {
-    throw new AuthorizationError(401, "Wrong Password", "ERR_AUTH");
+  if (!user || !compareSync(password, user.password)) {
+    throw new AuthorizationError(401, "Incorrect email or password", "ERR_AUTH");
   }
 
   res.status(200).json({

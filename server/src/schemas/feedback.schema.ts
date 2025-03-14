@@ -1,10 +1,10 @@
 import { z } from "zod"
 
 const FeedbackInput = z.object({
-  lessonId: z.string()
+  lessonId: z.string({message: "lessonId is required"})
     .uuid({ message: "Invalid lesson ID" }),
 
-  studentId: z.string()
+  studentId: z.string({message: "studentId is required"})
     .uuid({ message: "Invalid student ID" }),
 
   anonymous: z.boolean().default(false),

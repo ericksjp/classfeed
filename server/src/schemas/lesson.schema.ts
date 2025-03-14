@@ -8,8 +8,8 @@ const LessonInput = z.object({
 
   dateTime: z.coerce.date().default(new Date()),
 
-  classId: z.string()
-    .uuid({ message: "Invalid class ID" }),
+  classId: z.string({message: "ClassId is required"})
+    .uuid({ message: "Invalid ClassId" }),
 });
 
 export default LessonInput;

@@ -5,7 +5,7 @@ import { hashSync } from "bcryptjs";
 import { EntityNotFoundError, InternalError, ParamError } from "../errors";
 import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
-import { extractDefinedValues } from "../utils";
+import { extractDefinedValues, extractZodErrors } from "../utils";
 import { buildImageUrl } from "../utils/imageUrl";
 
 async function get(req: Request, res: Response) {
@@ -53,7 +53,7 @@ async function update(req: Request, res: Response) {
   }
 
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }
 
   const { id } = req.body;

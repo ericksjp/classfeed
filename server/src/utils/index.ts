@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import authConfig from "../config/authConfig";
 import { NextFunction, Request, Response } from "express";
+import { ZodError, ZodIssue } from "zod";
 
 export function generateToken(str: string) {
   return jwt.sign({ id: str }, authConfig.secret, {
@@ -44,4 +45,11 @@ export function extractDefinedValues<T extends object>(obj: T): Partial<T> {
   });
 
   return result;
+}
+
+export function extractZodErrors(error: ZodError): { [key: string]: string } {
+  return error.errors.reduce((obj: { [key: string]: string }, err: ZodIssue) => {
+    obj[err.path[0]] = err.message;
+    return obj;
+  }, {});
 }

@@ -3,7 +3,7 @@ import {Class, Lesson} from "../models"
 import { EntityNotFoundError, ValidationError } from "../errors";
 import { isUuidValid } from "../utils/validation";
 import { LessonInput } from "../schemas";
-import { extractDefinedValues } from "../utils";
+import { extractDefinedValues, extractZodErrors } from "../utils";
 
 export async function getlessons(req: Request, res: Response) {
   const classInstance = req.body.classInstance as Class;
@@ -51,7 +51,7 @@ export async function createLesson(req: Request, res: Response) {
   const { error } = LessonInput.safeParse({ title, classId: classInstance.id, dateTime });
 
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }
 
   const newLesson = await Lesson.create({
@@ -82,7 +82,7 @@ export async function updateLesson(req:Request, res:Response){
   const { error }= LessonInput.partial().safeParse(updateData);
 
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }
 
   const updated = await Lesson.update(updateData, {

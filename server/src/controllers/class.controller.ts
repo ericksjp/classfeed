@@ -4,7 +4,7 @@ import { Class, User } from "../models";
 import { ClassInput, UserInput } from "../schemas";
 import { ConflictError, EntityNotFoundError, ParamError, ValidationError } from "../errors";
 import { isUuidValid } from "../utils/validation";
-import { extractDefinedValues } from "../utils";
+import { extractDefinedValues, extractZodErrors } from "../utils";
 import { buildImageUrl } from "../utils/imageUrl";
 
 export async function createClass(req: Request, res: Response) {
@@ -12,7 +12,7 @@ export async function createClass(req: Request, res: Response) {
   const { error } = ClassInput.safeParse({ teacherId, name, subject, institution, status, location });
 
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }
 
   const newClass = await Class.create({
@@ -78,7 +78,7 @@ export async function updateClass(req: Request, res: Response) {
   const {error} = ClassInput.partial().safeParse(updateData)
 
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID")
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error))
   }
 
   classInstance.set(updateData);
@@ -148,10 +148,10 @@ export async function addStudent(req: Request, res: Response) {
   }
 
   const { email } = req.body;
-  const { error } = UserInput.partial().safeParse({ email });
+  const { error } = UserInput.pick({email: true}).safeParse({ email });
 
   if (error) {
-    throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
+    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID",extractZodErrors(error));
   }
 
   const student = await User.findOne({ where: { email } });
