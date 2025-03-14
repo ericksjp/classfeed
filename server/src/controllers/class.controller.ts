@@ -164,7 +164,7 @@ export async function addStudent(req: Request, res: Response) {
     throw new ConflictError(409, "User already in the class", "ERR_CONFLICT");
   }
 
-  res.sendStatus(200);
+  res.status(200).json({message: "User added to the class"});
 }
 
 export async function removeStudent(req: Request, res: Response) {
@@ -174,7 +174,6 @@ export async function removeStudent(req: Request, res: Response) {
   }
 
   let studentIntance = req.body.userInstance as User | null;
-  console.log(studentIntance)
 
   if (!studentIntance) {
 
@@ -196,7 +195,7 @@ export async function removeStudent(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "User not in the class", "ERR_NF");
   }
 
-  res.sendStatus(200);
+  res.status(200).json({message: "User removed from the class"});
 }
 
 /*-------- utils -------------*/

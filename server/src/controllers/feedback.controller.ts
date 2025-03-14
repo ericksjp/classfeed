@@ -64,7 +64,7 @@ async function deleteFeedback(req: Request, res: Response) {
   const { lessonId, feedbackId } = req.params;
   if (!isUuidValid(lessonId) || !isUuidValid(feedbackId)) throw new ValidationError(400, "Invalid ID", "ERR_VALID");
 
-  const feedback = await Feedback.findOne({ where: { id: feedbackId, lessonId, studentId: req.body.id } });
+  const feedback = await Feedback.findOne({ where: { id: feedbackId, lessonId } });
   if (!feedback) throw new EntityNotFoundError(404, "Feedback not found", "ERR_NF");
 
   await feedback.destroy();
