@@ -1,5 +1,4 @@
 import fs from "fs";
-import path from "path";
 import { Request, Response } from "express";
 import { User } from "../models/";
 import { hashSync } from "bcryptjs";
@@ -24,12 +23,16 @@ async function get(req: Request, res: Response) {
 async function remove(req: Request, res: Response) {
   const { id } = req.body;
 
-  const result = await User.destroy({
-    where: { id },
-  });
-
-  if (result === 0) {
+  const user = await User.findByPk(id)
+  if (!user) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+  }
+
+  await user.destroy();
+  const { profilePicture } = user.dataValues;
+  if (profilePicture !== "default_profile_picture.png") {
+    const imagePath =`${process.env.FILE_STORAGE_PATH}/${user.profilePicture}` 
+    fs.unlinkSync(imagePath);
   }
 
   res.sendStatus(204);
@@ -124,13 +127,15 @@ async function deleteProfilePicture(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  if(user.profilePicture !== "uploads/default_profile_picture.png") {
-    const oldImagePath = path.resolve(user.profilePicture);
-    fs.unlinkSync(oldImagePath);
+  if(user.profilePicture === "default_profile_picture.png") {
+    throw new ValidationError(400, "Profile picture is already the default one", "ERR_VALID");
   }
 
+  const imagePath = `${process.env.FILE_STORAGE_PATH}/${user.profilePicture}`
+  fs.unlinkSync(imagePath);
+
   await user.update({
-    profilePicture: "uploads/default_profile_picture.png"
+    profilePicture: "default_profile_picture.png"
   });
 
   res.sendStatus(204);
