@@ -5,6 +5,7 @@ import { ClassInput, UserInput } from "../schemas";
 import { ConflictError, EntityNotFoundError, ParamError, ValidationError } from "../errors";
 import { isUuidValid } from "../utils/validation";
 import { extractDefinedValues } from "../utils";
+import { buildImageUrl } from "../utils/imageUrl";
 
 export async function createClass(req: Request, res: Response) {
   const { id: teacherId, name, subject, institution, status, location } = req.body;
@@ -52,7 +53,9 @@ export async function getClassById(req: Request, res: Response) {
   const teacher = await User.findByPk(_class.teacherId, {
     raw: true,
     attributes: ["name", "id", "email", "profilePicture"]
-  })
+  });
+
+  teacher!.profilePicture = buildImageUrl(req.protocol, req.hostname, teacher!.profilePicture);
   res.status(200).json({ ..._class, teacherId: undefined, teacher });
   return;
 }
