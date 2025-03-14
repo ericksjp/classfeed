@@ -1,16 +1,16 @@
 import { Router } from "express";
 import UserController from "../controllers/user.controller";
 import Auth from "../middlewares/auth";
-import { multiTryCatchWrapper } from "../utils";
+import { catchError } from "../utils";
 import upload from "../config/upload";
 
 const userRoutes = Router();
 
-userRoutes.get("/", multiTryCatchWrapper([Auth, UserController.get]));
-userRoutes.delete("/", multiTryCatchWrapper([Auth, UserController.remove]));
-userRoutes.delete("/profilePicture", multiTryCatchWrapper([Auth, UserController.deleteProfilePicture]));
-userRoutes.patch("/", multiTryCatchWrapper([Auth, UserController.update]));
-userRoutes.patch("/profilePicture", multiTryCatchWrapper([upload.single("image"), Auth, UserController.updateProfilePicture]));
-userRoutes.get("/profilePicture", multiTryCatchWrapper([Auth, UserController.getProfilePicture]));
+userRoutes.get("/", catchError(Auth, UserController.get));
+userRoutes.delete("/", catchError(Auth, UserController.remove));
+userRoutes.patch("/", catchError(Auth, UserController.update));
+userRoutes.patch("/profilePicture", catchError(Auth, upload.single("image"), UserController.updateProfilePicture));
+userRoutes.get("/profilePicture", catchError(Auth, UserController.getProfilePicture));
+userRoutes.delete("/profilePicture", catchError(Auth, UserController.deleteProfilePicture));
 
 export default userRoutes;

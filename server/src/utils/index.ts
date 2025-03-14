@@ -8,18 +8,14 @@ export function generateToken(str: string) {
   });
 }
 
-export function tryCatchWrapper(controller: (req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void) {
-  return async function (req: Request, res: Response, next: NextFunction) {
+export function catchError(...middlewares: ((req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void)[]) {
+  return middlewares.map((middleware) => async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await controller(req, res, next);
+      await middleware(req, res, next);
     } catch (error) {
       return next(error);
     }
-  };
-}
-
-export function multiTryCatchWrapper(middlewares: ((req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void)[]) {
-  return middlewares.map((middleware) => tryCatchWrapper(middleware));
+  });
 }
 
 export function getErrorMessage(error: unknown) {
