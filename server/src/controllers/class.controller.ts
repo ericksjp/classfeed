@@ -87,25 +87,6 @@ export async function updateClass(req: Request, res: Response) {
   res.status(200).json(classInstance);
 }
 
-export async function updateClassStatus(req: Request, res: Response) {
-    const classInstance = req.body.classInstance as Class;
-    if (!classInstance) {
-      throw new EntityNotFoundError(404, "Class not found", "ERR_NF")
-    }
-
-    const { status } = req.body;
-    const {error} = ClassInput.partial().safeParse({status})
-
-    if (error) {
-      throw new ValidationError(400, error.errors[0].message, "ERR_VALID");
-    }
-
-    classInstance.set({status})
-    await classInstance.save()
-
-    res.status(200).json(classInstance);
-  }
-
 export async function deleteClass(req: Request, res: Response) {
   const classInstance = req.body.classInstance as Class;
   if (!classInstance) {
