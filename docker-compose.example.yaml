@@ -12,6 +12,7 @@ services:
       - JWT_SECRET=123456
     volumes:
       - ./server:/opt/app
+      - /home/erick/.local/state/cl_bucket:/opt/bucket
     container_name: classfeed_server
     restart: always
     depends_on:
