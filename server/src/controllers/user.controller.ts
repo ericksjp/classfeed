@@ -115,10 +115,32 @@ async function getProfilePicture(req: Request, res: Response) {
   res.status(200).json({ imageUrl });
 }
 
+async function deleteProfilePicture(req: Request, res: Response) {
+  const { id } = req.body;
+
+  const user = await User.findByPk(id);
+
+  if(!user) {
+    throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+  }
+
+  if(user.profilePicture !== "uploads/default_profile_picture.png") {
+    const oldImagePath = path.resolve(user.profilePicture);
+    fs.unlinkSync(oldImagePath);
+  }
+
+  await user.update({
+    profilePicture: "uploads/default_profile_picture.png"
+  });
+
+  res.sendStatus(204);
+}
+
 export default {
   get,
   update,
   remove,
   updateProfilePicture,
-  getProfilePicture
+  getProfilePicture,
+  deleteProfilePicture
 }

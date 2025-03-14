@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { addStudent, createClass, deleteClass, getClassById, getClasses, getStudent, getStudents, removeStudent, updateClass, updateClassStatus } from "../controllers/class.controller";
+import { addStudent, createClass, deleteClass, getClassById, getClasses, getStudent, getStudents, removeStudent, updateClass } from "../controllers/class.controller";
 import Auth from "../middlewares/auth";
 import lessonRoutes from "./lesson.route";
 import feedbackRoutes from "./feedback.route";
@@ -13,7 +13,6 @@ classRoutes.post("/", multiTryCatchWrapper([Auth, createClass]));
 classRoutes.get("/", multiTryCatchWrapper([Auth, getClasses]));
 classRoutes.get("/:classId", multiTryCatchWrapper([Auth, isUserPartOfClass, getClassById]));
 classRoutes.patch("/:classId", multiTryCatchWrapper([Auth, isUserTeacher, updateClass]));
-classRoutes.patch("/:classId", multiTryCatchWrapper([Auth, isUserTeacher, updateClassStatus]));
 classRoutes.delete("/:classId", multiTryCatchWrapper([Auth, isUserTeacher, deleteClass]));
 
 // Route for student exit the class
