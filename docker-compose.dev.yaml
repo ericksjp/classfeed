@@ -1,0 +1,45 @@
+services:
+  server:
+    build:
+      context: ./server
+      target: build
+    ports:
+      - 3001:3001
+    env_file: ./server/.env
+    environment:
+      DOCKER_DB_HOST: db
+      FILE_STORAGE_PATH: /opt/bucket
+    volumes:
+      - ./server:/opt/app
+      - /opt/app/node_modules
+      - /opt/app/dist
+      - ./bucket:/opt/bucket
+    restart: always
+    container_name: classfeed_server
+    depends_on:
+      db:
+        condition: service_healthy
+    command: sh -c "npx sequelize db:migrate && npm run dev"
+
+  db:
+    image: postgis/postgis
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=classfeed
+    restart: always
+    container_name: classfeed_db
+    volumes:
+      - classfeed-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 2s
+
+volumes:
+  classfeed-db:
+

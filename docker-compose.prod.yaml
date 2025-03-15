@@ -1,19 +1,20 @@
 services:
   server:
-    build: ./server
+    build:
+      context: ./server
+      target: production
     ports:
       - 3001:3001
     env_file: ./server/.env
-    enviroment:
+    environment:
       DOCKER_DB_HOST: db
       FILE_STORAGE_PATH: /opt/bucket
     volumes:
-      - ./server:/opt/app
-      - /home/erick/.local/state/cl_bucket:/opt/bucket
+      - ./bucket:/opt/bucket
     container_name: classfeed_server
-    restart: always
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgis/postgis
@@ -27,6 +28,13 @@ services:
     container_name: classfeed_db
     volumes:
       - classfeed-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+      start_period: 2s
 
 volumes:
   classfeed-db:
+
