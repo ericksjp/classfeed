@@ -1,6 +1,7 @@
 import { Association, HasManyCreateAssociationMixin, HasManyRemoveAssociationMixin, Sequelize } from "sequelize";
 import { Model, DataTypes } from "sequelize";
 import Class from "./class.model";
+import { hashSync } from "bcryptjs";
 
 class User extends Model {
   public readonly id!: string;
@@ -71,6 +72,9 @@ class User extends Model {
         password: {
           type: DataTypes.STRING,
           allowNull: false,
+          set(value: string) {
+            this.setDataValue("password", hashSync(value, 10))
+          }
         },
       },
       {

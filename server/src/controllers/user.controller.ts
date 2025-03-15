@@ -48,10 +48,6 @@ async function update(req: Request, res: Response) {
 
   const { error } = UserInput.partial().safeParse(updateData);
 
-  if (updateData.password) {
-    updateData.password = hashSync(updateData.password, 10)
-  }
-
   if (error) {
     throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }

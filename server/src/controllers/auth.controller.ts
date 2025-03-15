@@ -20,10 +20,8 @@ async function signup(req: Request, res: Response) {
     throw new ConflictError(409, "User already exists", "ERR_CONFLICT");
   }
 
-  const hashedPassword = hashSync(password, 10);
-
   const {dataValues: user} = await User.create(
-    { email, name, password: hashedPassword, dateOfBirth },
+    { email, name, password, dateOfBirth },
   );
 
   if (!user) {
