@@ -35,21 +35,23 @@ export function getErrorMessage(error: unknown) {
   return "An error occured"
 }
 
-export function extractDefinedValues<T extends object>(obj: T): Partial<T> {
-  const result: Partial<T> = {};
-
-  (Object.keys(obj) as (keyof T)[]).forEach((key) => {
-    if (obj[key] !== undefined) {
-      result[key] = obj[key];
-    }
-  });
-
-  return result;
-}
-
 export function extractZodErrors(error: ZodError): { [key: string]: string } {
   return error.errors.reduce((obj: { [key: string]: string }, err: ZodIssue) => {
     obj[err.path[0]] = err.message;
     return obj;
   }, {});
+}
+
+export function sanitizeObject<T extends object>(
+  obj: T,
+  transformations: {
+    [K in keyof T]?: () => T[K] | undefined 
+  },
+): Partial<T> {
+  const newObject = JSON.stringify(obj, (key, value) => {
+    const func = transformations[key as keyof T];
+    return func ? func() : value
+  });
+
+  return JSON.parse(newObject);
 }

@@ -1,23 +1,20 @@
 import fs from "fs";
 import { Request, Response } from "express";
 import { User } from "../models/";
-import { hashSync } from "bcryptjs";
 import { EntityNotFoundError, InternalError, ParamError } from "../errors";
 import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
-import { extractDefinedValues, extractZodErrors } from "../utils";
-import { buildImageUrl } from "../utils/imageUrl";
+import { extractZodErrors, sanitizeObject } from "../utils";
 
 async function get(req: Request, res: Response) {
   const { id } = req.body;
-  const user = await User.findByPk(id, { raw: true });
+  const user = await User.findByPk(id).then(user => user?.getPublicProfile(req.protocol, req.hostname));
 
   if (!user) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  res.status(200).json({ ...user, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture), 
-    password: undefined });
+  res.status(200).json(user);
 }
 
 async function remove(req: Request, res: Response) {
@@ -39,11 +36,8 @@ async function remove(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  const updateData = extractDefinedValues({
-    email: req.body.email,
-    name: req.body.name,
-    dateOfBirth: req.body.dateOfBirth,
-    password: req.body.password
+  const updateData = sanitizeObject(req.body, {
+    id: () => undefined
   })
 
   const { error } = UserInput.partial().safeParse(updateData);
@@ -59,14 +53,15 @@ async function update(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  const { dataValues: updatedUser } = await user.update(updateData);
+  const updatedUser = await user
+    .update(updateData)
+    .then((user) => user.getPublicProfile(req.protocol, req.hostname));
 
   if (!updatedUser) {
     throw new InternalError(500, "Cannot update user", "ERR_INTERNAL");
   }
 
-  res.status(200).json({ ...updatedUser, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture), 
-    password: undefined });
+  res.status(200).json(updatedUser);
 }
 
 async function updateProfilePicture(req: Request, res: Response) {
@@ -88,30 +83,25 @@ async function updateProfilePicture(req: Request, res: Response) {
     fs.unlinkSync(oldImagePath);
   }
 
-  const { dataValues: updatedUser } = await user.update({
-    profilePicture: filename
-  });
+  const updatedUser = await user
+    .update({ profilePicture: filename })
+    .then((user) => user.getPublicProfile(req.protocol, req.hostname));
 
-  res.status(200).json({ ...updatedUser, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture),
-    password: undefined });
+  res.status(200).json(updatedUser)
 }
 
 async function getProfilePicture(req: Request, res: Response) {
   const { id } = req.body;
 
-  const user = await User.findByPk(id);
+  const profilePicture = await User.findByPk(id).then(
+    (user) => user?.profilePicture
+  );
 
-  if(!user) {
+  if(!profilePicture) {
     throw new EntityNotFoundError(404, "User not found", "ERR_NF");
   }
 
-  if (!user.profilePicture) {
-    throw new EntityNotFoundError(404, "Profile picture not found", "ERR_NF");
-  }
-
-  const imageUrl = buildImageUrl(req.protocol, req.hostname, user.profilePicture);
-
-  res.status(200).json({ imageUrl });
+  res.status(200).json({ profilePicture });
 }
 
 async function deleteProfilePicture(req: Request, res: Response) {
@@ -124,7 +114,7 @@ async function deleteProfilePicture(req: Request, res: Response) {
   }
 
   if(user.profilePicture === "default_profile_picture.png") {
-    throw new ValidationError(400, "Profile picture is already the default one", "ERR_VALID");
+    throw new ValidationError(409, "Profile picture is already the default one", "ERR_CONFLICT");
   }
 
   const imagePath = `${process.env.FILE_STORAGE_PATH}/${user.profilePicture}`

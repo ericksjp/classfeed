@@ -2,6 +2,16 @@ import { Association, HasManyCreateAssociationMixin, HasManyRemoveAssociationMix
 import { Model, DataTypes } from "sequelize";
 import Class from "./class.model";
 import { hashSync } from "bcryptjs";
+import { buildImageUrl } from "../utils/imageUrl";
+import { sanitizeObject } from "../utils";
+
+type PublicUser = {
+  id: string;
+  name: string;
+  email: string;
+  dateOfBirth: Date;
+  profilePicture: string;
+};
 
 class User extends Model {
   public readonly id!: string;
@@ -19,6 +29,14 @@ class User extends Model {
 
   public static associations: {
       classes: Association<User, Class>
+  }
+
+  // Getter function to return a sanitized user object
+  public getPublicProfile(reqProtocol: string, reqHost: string): PublicUser {
+    return sanitizeObject(this.dataValues, {
+      password: () => undefined,
+      profilePicture: () => buildImageUrl(reqProtocol, reqHost, this.profilePicture),
+    }) as PublicUser
   }
 
  // eslint-disable-next-line @typescript-eslint/no-explicit-any

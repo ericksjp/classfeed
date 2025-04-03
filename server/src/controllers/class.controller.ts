@@ -4,8 +4,7 @@ import { Class, User } from "../models";
 import { ClassInput, UserInput } from "../schemas";
 import { ConflictError, EntityNotFoundError, ParamError, ValidationError } from "../errors";
 import { isUuidValid } from "../utils/validation";
-import { extractDefinedValues, extractZodErrors } from "../utils";
-import { buildImageUrl } from "../utils/imageUrl";
+import {  extractZodErrors, sanitizeObject } from "../utils";
 
 export async function createClass(req: Request, res: Response) {
   const { id: teacherId, name, subject, institution, status, location } = req.body;
@@ -49,14 +48,11 @@ export async function getClassById(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
   }
 
-  const { dataValues: _class } = classInstance;
-  const teacher = await User.findByPk(_class.teacherId, {
-    raw: true,
-    attributes: ["name", "id", "email", "profilePicture"]
-  });
+  const teacher = await User.findByPk(classInstance.teacherId).then(
+    (user) => user?.getPublicProfile(req.protocol, req.hostname),
+  );
 
-  teacher!.profilePicture = buildImageUrl(req.protocol, req.hostname, teacher!.profilePicture);
-  res.status(200).json({ ..._class, teacherId: undefined, teacher });
+  res.status(200).json({ ...classInstance.dataValues, teacherId: undefined, teacher });
   return;
 }
 
@@ -67,13 +63,7 @@ export async function updateClass(req: Request, res: Response) {
   }
 
   // prevent sequelize from updating undefined values
-  const updateData = extractDefinedValues({
-    name: req.body.name,
-    subject: req.body.subject,
-    institution: req.body.institution,
-    status: req.body.status,
-    location: req.body.location,
-  })
+  const updateData = sanitizeObject(req.body, {});
 
   const {error} = ClassInput.partial().safeParse(updateData)
 
@@ -104,15 +94,19 @@ export async function getStudents(req: Request, res: Response) {
     throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
   }
 
-  const response = await Class.findByPk(classInstance.id, {
+  const students = await Class.findByPk(classInstance.id, {
     include: {
       model: User,
-      attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
       through: { attributes: [] },
     },
-  });
+  }).then(
+    (_class) =>
+      _class?.Users?.map((user) =>
+        user.getPublicProfile(req.protocol, req.hostname),
+      ),
+  );
 
-  res.status(200).json(response?.Users || []);
+  res.status(200).json(students);
 }
 
 export async function getStudent(req: Request, res: Response) {
@@ -122,23 +116,26 @@ export async function getStudent(req: Request, res: Response) {
   }
 
   const { studentId } = req.params;
-  const response = await Class.findByPk(classInstance.id, {
+
+  const student = await Class.findByPk(classInstance.id, {
     include: {
       model: User,
-      attributes: ["id", "name", "email", "profilePicture", "dateOfBirth"],
       where: {
         id: studentId,
       },
       through: { attributes: [] },
       required: true,
     },
-  });
+  }).then(
+    (_class) =>
+      _class?.Users?.at(0)?.getPublicProfile(req.protocol, req.hostname),
+  );
 
-  if (!response || !response.Users || response.Users.length === 0) {
+  if (!student) {
     throw new EntityNotFoundError(404, "Student not found", "ERR_NF");
   }
 
-  res.status(200).json(response.Users[0]);
+  res.status(200).json(student);
 }
 
 export async function addStudent(req: Request, res: Response) {

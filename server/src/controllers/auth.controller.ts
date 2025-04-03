@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import { User } from "../models";
-import { compareSync, hashSync } from "bcryptjs";
+import { compareSync } from "bcryptjs";
 import { extractZodErrors, generateToken } from "../utils";
 import { UserInput } from "../schemas";
 import { AuthorizationError, ConflictError, InternalError, ValidationError } from "../errors";
-import { buildImageUrl } from "../utils/imageUrl";
 
 async function signup(req: Request, res: Response) {
   const { email, name, password, dateOfBirth } = req.body;
@@ -20,9 +19,9 @@ async function signup(req: Request, res: Response) {
     throw new ConflictError(409, "User already exists", "ERR_CONFLICT");
   }
 
-  const {dataValues: user} = await User.create(
+  const user = await User.create(
     { email, name, password, dateOfBirth },
-  );
+  ).then(user => user.getPublicProfile(req.protocol, req.hostname));
 
   if (!user) {
     throw new InternalError(500, "User creation failed", "ERR_INTERNAL");
@@ -30,7 +29,7 @@ async function signup(req: Request, res: Response) {
 
   res.status(201).json({
     message: "User created successfully",
-    user: {...user, profilePicture: buildImageUrl(req.protocol, req.hostname, user.profilePicture), password: undefined},
+    user,
     token: generateToken(user.id)
   });
 }

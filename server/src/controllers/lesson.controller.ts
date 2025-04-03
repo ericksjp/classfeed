@@ -3,7 +3,7 @@ import {Class, Lesson} from "../models"
 import { EntityNotFoundError, ValidationError } from "../errors";
 import { isUuidValid } from "../utils/validation";
 import { LessonInput } from "../schemas";
-import { extractDefinedValues, extractZodErrors } from "../utils";
+import { extractZodErrors, sanitizeObject } from "../utils";
 
 export async function getlessons(req: Request, res: Response) {
   const classInstance = req.body.classInstance as Class;
@@ -74,10 +74,7 @@ export async function updateLesson(req:Request, res:Response){
     throw new ValidationError(400, "Invalid lessonId", "ERR_BAD_REQUEST");
   }
 
-  const updateData = extractDefinedValues({
-    title: req.body.title,
-    dateTime: req.body.dateTime,
-  })
+  const updateData = sanitizeObject(req.body, {})
 
   const { error }= LessonInput.partial().safeParse(updateData);
 
