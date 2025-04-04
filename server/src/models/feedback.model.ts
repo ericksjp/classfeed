@@ -1,5 +1,6 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, ModelStatic } from "sequelize";
 import { Sequelize } from "sequelize";
+import { validateModels } from "../utils";
 
 class Feedback extends Model {
   public readonly id!: string;
@@ -82,8 +83,9 @@ class Feedback extends Model {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static associate(models: any) {
+  public static associate(models: { [key: string]: ModelStatic<Model> }) {
+    validateModels("Feedback", ["Lesson", "User"], models);
+
     this.belongsTo(models.Lesson, {
       foreignKey: "lessonId",
       onDelete: "CASCADE",

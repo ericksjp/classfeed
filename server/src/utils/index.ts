@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import authConfig from "../config/authConfig";
 import { NextFunction, Request, Response } from "express";
 import { ZodError, ZodIssue } from "zod";
+import { ModelStatic, Model } from "sequelize";
 
 export function generateToken(str: string) {
   return jwt.sign({ id: str }, authConfig.secret, {
@@ -54,4 +55,22 @@ export function sanitizeObject<T extends object>(
   });
 
   return JSON.parse(newObject);
+}
+
+export function validateModels(
+  currentModel: string,
+  required: string[],
+  models: { [key: string]: ModelStatic<Model> },
+): void {
+  const missingModels = required.filter(modelName => !models[modelName]);
+  
+  if (missingModels.length > 0) {
+    const availableModels = Object.keys(models).sort();
+    
+    throw new Error(
+      `Missing required model${missingModels.length > 1 ? 's' : ''} for association with "${currentModel}" model:\n` +
+      `• Missing: ${missingModels.map(m => `"${m}"`).join(', ')}\n` +
+      `• Available models: ${availableModels.map(m => `"${m}"`).join(', ')}`
+    );
+  }
 }

@@ -1,7 +1,8 @@
-import { DataTypes, Model } from "sequelize";
+import { DataTypes, Model, ModelStatic } from "sequelize";
 
 import User from "./user.model";
 import { Sequelize } from "sequelize";
+import { validateModels } from "../utils";
 
 type LocationType = {
   type: "Point";
@@ -21,24 +22,27 @@ class Class extends Model {
   public declare removeUser: (user: User) => Promise<unknown>;
   public readonly Users?: User[]
 
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-   public static associate(models: any) {
+  public static associate(models: { [key: string]: ModelStatic<Model> }) {
+    validateModels("Class", ["Lesson", "User"], models);
+
     this.belongsToMany(models.User, {
-      through: 'user_class',
-      foreignKey: 'classId',
-      otherKey: 'userId',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
+      through: "user_class",
+      foreignKey: "classId",
+      otherKey: "userId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
+
     this.belongsTo(models.User, {
-      foreignKey: 'teacherId',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
+      foreignKey: "teacherId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
+
     this.hasMany(models.Lesson, {
-      foreignKey: 'classId',
-      onDelete: 'CASCADE',
-      onUpdate: 'CASCADE',
+      foreignKey: "classId",
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     });
   }
 

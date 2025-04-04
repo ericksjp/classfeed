@@ -1,9 +1,9 @@
-import { Association, HasManyCreateAssociationMixin, HasManyRemoveAssociationMixin, Sequelize } from "sequelize";
+import { Association, HasManyCreateAssociationMixin, HasManyRemoveAssociationMixin, ModelStatic, Sequelize } from "sequelize";
 import { Model, DataTypes } from "sequelize";
 import Class from "./class.model";
 import { hashSync } from "bcryptjs";
 import { buildImageUrl } from "../utils/imageUrl";
-import { sanitizeObject } from "../utils";
+import { sanitizeObject, validateModels } from "../utils";
 
 type PublicUser = {
   id: string;
@@ -39,8 +39,9 @@ class User extends Model {
     }) as PublicUser
   }
 
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- public static associate(models: any) {
+  public static associate(models: { [key: string]: ModelStatic<Model> }) {
+    validateModels("User", ["Class", "Feedback"], models);
+
     this.belongsToMany(models.Class, {
       through: "user_class",
       foreignKey: "userId",
@@ -54,6 +55,7 @@ class User extends Model {
       onDelete: "CASCADE",
       onUpdate: "CASCADE",
     });
+
     this.hasMany(models.Feedback, {
       foreignKey: "studentId",
       onDelete: "CASCADE",
