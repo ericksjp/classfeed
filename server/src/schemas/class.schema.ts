@@ -18,7 +18,7 @@ const ClassInput = z.object({
 
   status: z.enum(["Ativo", "Arquivado"], { message: "Invalid status" }),
 
-  location: z.tuple([z.number(), z.number()]).optional(),
+  location: z.union([z.tuple([z.number(), z.number()]), z.null()]).optional(),
 
   teacherId: z.string()
     .uuid({ message: "Invalid teacher ID" }),

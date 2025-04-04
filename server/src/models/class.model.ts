@@ -71,11 +71,16 @@ class Class extends Model {
           type: DataTypes.GEOMETRY("POINT"),
           allowNull: true,
           get() {
-            const location = this.getDataValue("location");
-            return location ? location.coordinates : null;
+            const location = this.getDataValue("location")?.coordinates;
+            if (!location) return null;
+
+            return {
+              longitude: location[0],
+              latitude: location[1],
+            };
           },
           set(val: [number, number] | null) {
-            if (val === null) return this.setDataValue("location", null);
+            if (!val) return this.setDataValue("location", null);
 
             this.setDataValue("location", {
               type: "POINT",

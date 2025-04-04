@@ -123,7 +123,6 @@ export async function getStudent(req: Request, res: Response) {
       where: {
         id: studentId,
       },
-      through: { attributes: [] },
       required: true,
     },
   }).then(
@@ -200,14 +199,11 @@ export async function removeStudent(req: Request, res: Response) {
 async function getTeacherClasses(userId: string) {
   return await Class.findAll({
     where: { teacherId: userId },
-    raw: true,
   });
 }
 
 async function getStudentClasses(userId: string) {
   return await Class.findAll({
-    raw: true,
-    attributes: ['id', 'name', 'subject', 'institution', 'status', 'location', 'teacherId'],
     include: {
       model: User,
       attributes: [],
