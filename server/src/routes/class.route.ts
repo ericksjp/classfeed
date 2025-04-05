@@ -5,24 +5,24 @@ import Auth from "../middlewares/auth";
 import lessonRoutes from "./lesson.route";
 import feedbackRoutes from "./feedback.route";
 import { isUserPartOfClass, isUserStudent, isUserTeacher } from "../middlewares/verify";
-import { catchError } from "../utils";
+import { tryCatch } from "../utils";
 
 const classRoutes = Router();
 
-classRoutes.post("/", catchError(Auth, createClass));
-classRoutes.get("/", catchError(Auth, getClasses));
-classRoutes.get("/:classId", catchError(Auth, isUserPartOfClass, getClassById));
-classRoutes.patch("/:classId", catchError(Auth, isUserTeacher, updateClass));
-classRoutes.delete("/:classId", catchError(Auth, isUserTeacher, deleteClass));
+classRoutes.post("/", tryCatch(Auth, createClass));
+classRoutes.get("/", tryCatch(Auth, getClasses));
+classRoutes.get("/:classId", tryCatch(Auth, isUserPartOfClass, getClassById));
+classRoutes.patch("/:classId", tryCatch(Auth, isUserTeacher, updateClass));
+classRoutes.delete("/:classId", tryCatch(Auth, isUserTeacher, deleteClass));
 
 // Route for student exit the class
-classRoutes.delete("/:classId/drop", catchError(Auth, isUserStudent, removeStudent))
+classRoutes.delete("/:classId/drop", tryCatch(Auth, isUserStudent, removeStudent))
 
 // Routes for teacher actions related to students in a class
-classRoutes.get("/:classId/student", catchError(Auth, isUserPartOfClass, getStudents))
-classRoutes.get("/:classId/student/:studentId", catchError(Auth, isUserTeacher, getStudent))
-classRoutes.post("/:classId/student", catchError(Auth, isUserTeacher, addStudent))
-classRoutes.delete("/:classId/student/:studentId", catchError(Auth, isUserTeacher, removeStudent))
+classRoutes.get("/:classId/student", tryCatch(Auth, isUserPartOfClass, getStudents))
+classRoutes.get("/:classId/student/:studentId", tryCatch(Auth, isUserTeacher, getStudent))
+classRoutes.post("/:classId/student", tryCatch(Auth, isUserTeacher, addStudent))
+classRoutes.delete("/:classId/student/:studentId", tryCatch(Auth, isUserTeacher, removeStudent))
 
 // nested routes
 classRoutes.use("/:classId/lesson", lessonRoutes);

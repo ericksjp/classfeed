@@ -1,12 +1,12 @@
 import {Router} from 'express'
 import AuthController from '../controllers/auth.controller';
 import Auth from '../middlewares/auth';
-import {catchError} from "../utils/"
+import {tryCatch} from "../utils/"
 
 const authRoute = Router();
 
-authRoute.post('/login', catchError(AuthController.login))
-authRoute.post('/signup', catchError(AuthController.signup))
-authRoute.get('/refresh', catchError(Auth, AuthController.refresh))
+authRoute.post('/login', tryCatch(AuthController.login))
+authRoute.post('/signup', tryCatch(AuthController.signup))
+authRoute.get('/refresh', tryCatch(Auth, AuthController.refresh))
 
 export default authRoute;

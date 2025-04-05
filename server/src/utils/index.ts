@@ -10,7 +10,7 @@ export function generateToken(str: string) {
   });
 }
 
-export function catchError(...middlewares: ((req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void)[]) {
+export function tryCatch(...middlewares: ((req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void)[]) {
   return middlewares.map((middleware) => async (req: Request, res: Response, next: NextFunction) => {
     try {
       await middleware(req, res, next);
