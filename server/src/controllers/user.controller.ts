@@ -5,6 +5,7 @@ import { EntityNotFoundError, InternalError, ParamError } from "../errors";
 import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
 import { extractZodErrors, sanitizeObject } from "../utils";
+import { FILE_STORAGE_PATH } from "../config/config";
 
 async function get(req: Request, res: Response) {
   const { id } = req.body;
@@ -28,7 +29,7 @@ async function remove(req: Request, res: Response) {
   await user.destroy();
   const { profilePicture } = user.dataValues;
   if (profilePicture !== "default_profile_picture.png") {
-    const imagePath =`${process.env.FILE_STORAGE_PATH}/${user.profilePicture}` 
+    const imagePath =`${FILE_STORAGE_PATH}/${user.profilePicture}` 
     fs.unlinkSync(imagePath);
   }
 
@@ -79,7 +80,7 @@ async function updateProfilePicture(req: Request, res: Response) {
   }
 
   if(user.profilePicture !== "default_profile_picture.png") {
-    const oldImagePath = `${process.env.FILE_STORAGE_PATH}/${user.profilePicture}`
+    const oldImagePath = `${FILE_STORAGE_PATH}/${user.profilePicture}`
     fs.unlinkSync(oldImagePath);
   }
 
@@ -117,7 +118,7 @@ async function deleteProfilePicture(req: Request, res: Response) {
     throw new ValidationError(409, "Profile picture is already the default one", "ERR_CONFLICT");
   }
 
-  const imagePath = `${process.env.FILE_STORAGE_PATH}/${user.profilePicture}`
+  const imagePath = `${FILE_STORAGE_PATH}/${user.profilePicture}`
   fs.unlinkSync(imagePath);
 
   await user.update({

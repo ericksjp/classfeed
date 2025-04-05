@@ -1,8 +1,7 @@
-import { config } from 'dotenv';
-config();
+import { JWT_SECRET, JWT_EXPTIME } from './config';
 
 export default {
-  secret: process.env.JWT_SECRET as string,
-  expiresIn: 1000 * 60 * 60 * 24 * 2,
+  secret: JWT_SECRET,
+  expiresIn: JWT_EXPTIME,
 }
 

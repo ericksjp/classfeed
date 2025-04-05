@@ -1,3 +1,5 @@
+import { PORT } from "../config/config";
+
 export function buildImageUrl(protocol: string, host: string, filename: string) {
-    return `${protocol}://${host}:${process.env.SERVER_PORT || 3000}/uploads/${filename}`;
+    return `${protocol}://${host}:${PORT}/uploads/${filename}`;
 }

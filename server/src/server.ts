@@ -1,11 +1,10 @@
-import {sequelize} from './models/index';
+import { PORT } from './config/config';
+import { sequelize } from './models/index';
 import app from "./app";
 import { Server } from 'http';
 
-const port = process.env.SERVER_PORT || 3000;
-
-const server: Server = app.listen(port, async () => {
-  console.log(`App running on port ${port}...`);
+const server: Server = app.listen(PORT, async () => {
+  console.log(`App running on port ${PORT}...`);
   try {
     await sequelize.authenticate()
     console.log('Connected to the database!')
