@@ -4,8 +4,8 @@ import { NextFunction, Request, Response } from "express";
 import { ZodError, ZodIssue } from "zod";
 import { ModelStatic, Model } from "sequelize";
 
-export function generateToken(str: string) {
-  return jwt.sign({ id: str }, authConfig.secret, {
+export function generateToken(payload: { [key: string]: string }) {
+  return jwt.sign(payload , authConfig.secret, {
     expiresIn: authConfig.expiresIn,
   });
 }
@@ -73,4 +73,13 @@ export function validateModels(
       `• Available models: ${availableModels.map(m => `"${m}"`).join(', ')}`
     );
   }
+}
+
+export function generateOTP(length: number) {
+  const digits = "0123456789";
+  let OTP = "";
+  for (let i = 0; i < length; i++) {
+    OTP += digits[Math.floor(Math.random() * 10)];
+  }
+  return OTP;
 }

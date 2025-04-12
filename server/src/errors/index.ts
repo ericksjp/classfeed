@@ -10,6 +10,7 @@ class TimeoutError extends CustomError<ErrorCode> {}
 class ConflictError extends CustomError<ErrorCode> {}
 class FileError extends CustomError<ErrorCode> {}
 class InternalError extends CustomError<ErrorCode> {}
+class OTPError extends CustomError<ErrorCode> {}
 
 export {
   EntityNotFoundError,
@@ -22,4 +23,5 @@ export {
   ConflictError,
   FileError,
   InternalError,
+  OTPError,
 }

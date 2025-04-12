@@ -11,3 +11,4 @@ type ErrorCode =
   | "ERR_UNAVAILABLE"
   | "ERR_NOT_IMPLEMENTED"
   | "ERR_CONFLICT"
+  | "ERR_OTP"

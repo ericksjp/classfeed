@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { addStudent, createClass, deleteClass, getClassById, getClasses, getStudent, getStudents, removeStudent, updateClass } from "../controllers/class.controller";
-import Auth from "../middlewares/auth";
+import { authId } from "../middlewares/auth";
 import lessonRoutes from "./lesson.route";
 import feedbackRoutes from "./feedback.route";
 import { isUserPartOfClass, isUserStudent, isUserTeacher } from "../middlewares/verify";
@@ -9,20 +9,20 @@ import { tryCatch } from "../utils";
 
 const classRoutes = Router();
 
-classRoutes.post("/", tryCatch(Auth, createClass));
-classRoutes.get("/", tryCatch(Auth, getClasses));
-classRoutes.get("/:classId", tryCatch(Auth, isUserPartOfClass, getClassById));
-classRoutes.patch("/:classId", tryCatch(Auth, isUserTeacher, updateClass));
-classRoutes.delete("/:classId", tryCatch(Auth, isUserTeacher, deleteClass));
+classRoutes.post("/", tryCatch(authId, createClass));
+classRoutes.get("/", tryCatch(authId, getClasses));
+classRoutes.get("/:classId", tryCatch(authId, isUserPartOfClass, getClassById));
+classRoutes.patch("/:classId", tryCatch(authId, isUserTeacher, updateClass));
+classRoutes.delete("/:classId", tryCatch(authId, isUserTeacher, deleteClass));
 
 // Route for student exit the class
-classRoutes.delete("/:classId/drop", tryCatch(Auth, isUserStudent, removeStudent))
+classRoutes.delete("/:classId/drop", tryCatch(authId, isUserStudent, removeStudent))
 
 // Routes for teacher actions related to students in a class
-classRoutes.get("/:classId/student", tryCatch(Auth, isUserPartOfClass, getStudents))
-classRoutes.get("/:classId/student/:studentId", tryCatch(Auth, isUserTeacher, getStudent))
-classRoutes.post("/:classId/student", tryCatch(Auth, isUserTeacher, addStudent))
-classRoutes.delete("/:classId/student/:studentId", tryCatch(Auth, isUserTeacher, removeStudent))
+classRoutes.get("/:classId/student", tryCatch(authId, isUserPartOfClass, getStudents))
+classRoutes.get("/:classId/student/:studentId", tryCatch(authId, isUserTeacher, getStudent))
+classRoutes.post("/:classId/student", tryCatch(authId, isUserTeacher, addStudent))
+classRoutes.delete("/:classId/student/:studentId", tryCatch(authId, isUserTeacher, removeStudent))
 
 // nested routes
 classRoutes.use("/:classId/lesson", lessonRoutes);

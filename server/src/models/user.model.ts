@@ -5,7 +5,18 @@ import { hashSync } from "bcryptjs";
 import { buildImageUrl } from "../utils/imageUrl";
 import { sanitizeObject, validateModels } from "../utils";
 
-type PublicUser = {
+export type UserType = {
+  id: string;
+  name: string;
+  email: string;
+  dateOfBirth: Date;
+  profilePicture: string;
+  password: string,
+};
+
+export type UserWithoutId = Omit<UserType, "id">
+
+export type PublicUser = {
   id: string;
   name: string;
   email: string;
@@ -92,9 +103,6 @@ class User extends Model {
         password: {
           type: DataTypes.STRING,
           allowNull: false,
-          set(value: string) {
-            this.setDataValue("password", hashSync(value, 10))
-          }
         },
       },
       {

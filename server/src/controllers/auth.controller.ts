@@ -1,16 +1,23 @@
 import { Request, Response } from "express";
 import { User } from "../models";
-import { compareSync } from "bcryptjs";
+import { compareSync, hashSync } from "bcryptjs";
 import { extractZodErrors, generateToken } from "../utils";
+import { sendOTPMail } from "../services/mail.service";
 import { UserInput } from "../schemas";
 import { AuthorizationError, ConflictError, InternalError, ValidationError } from "../errors";
+import * as Otp from "../services/opt.service";
 
-async function signup(req: Request, res: Response) {
+async function saveUserWithOtp(req: Request, res: Response) {
   const { email, name, password, dateOfBirth } = req.body;
   const { error } = UserInput.safeParse(req.body);
 
   if (error) {
-    throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
+    throw new ValidationError(
+      400,
+      "Invalid Input Data. Check the Details!",
+      "ERR_VALID",
+      extractZodErrors(error),
+    );
   }
 
   const existingUser = await User.findOne({ where: { email } });
@@ -19,18 +26,41 @@ async function signup(req: Request, res: Response) {
     throw new ConflictError(409, "User already exists", "ERR_CONFLICT");
   }
 
-  const user = await User.create(
-    { email, name, password, dateOfBirth },
-  ).then(user => user.getPublicProfile(req.protocol, req.hostname));
+  const otp = Otp.saveUser({
+    email,
+    name,
+    dateOfBirth,
+    password: hashSync(password),
+    profilePicture: "default_profile_picture.png",
+  });
 
-  if (!user) {
+  sendOTPMail(email, name, otp);
+
+  res.status(200).json({
+    message: "Sucess. Confirm the OTP code to create the user.",
+    token: generateToken({ email: email }),
+  });
+}
+
+async function persistUser(req: Request, res: Response) {
+  const { email } = req.body;
+
+  const otpCode = req.body.code as string;
+
+  const user = Otp.retrieveUser(email, otpCode);
+
+  const createdUser = await User.create(user).then((user) =>
+    user && user.getPublicProfile(req.protocol, req.hostname),
+  );
+
+  if (!createdUser) {
     throw new InternalError(500, "User creation failed", "ERR_INTERNAL");
   }
 
   res.status(201).json({
     message: "User created successfully",
-    user,
-    token: generateToken(user.id)
+    user: createdUser,
+    token: generateToken({ id: createdUser.id }),
   });
 }
 
@@ -49,16 +79,17 @@ async function login(req: Request, res: Response) {
 
   res.status(200).json({
     success: "You are successfully connected, " + user.name,
-    token: generateToken(user.id),
+    token: generateToken({id: user.id}),
   });
 }
 
 async function refresh(req: Request, res: Response) {
-  res.status(200).json({ token: generateToken(req.body.id) });
+  res.status(200).json({ token: generateToken({id: req.body.id}) });
 }
 
 export default {
+  persistUser,
   login,
-  signup,
+  saveUserWithOtp,
   refresh
 };

@@ -22,19 +22,18 @@ function getBucketDirectory(): string {
   return dirPath;
 }
 
-function getTokenExpirationTime(): number {
-  const expirationTime = process.env.JWT_EXPTIME;
+function getExpirationTime(name: string, env?: string): number {
 
-  if (!expirationTime || expirationTime.length < 2) {
-    throw new Error("Invalid or missing ENV: JWT_EXPTIME");
+  if (!env || env.length < 2) {
+    throw new Error(`Invalid or missing ENV: ${name}`);
   }
 
-  const timeValue = parseInt(expirationTime.slice(0, -1), 10);
+  const timeValue = parseInt(env.slice(0, -1), 10);
   if (!timeValue) {
-    throw new Error("Invalid or missing ENV: JWT_EXPTIME");
+    throw new Error(`Invalid or missing ENV: ${name}`);
   }
 
-  const timeUnit = expirationTime.at(-1);
+  const timeUnit = env.at(-1);
   let multiplier = 0;
 
   const SECOND = 1000 * 60;
@@ -84,6 +83,30 @@ function getNodeEnv() {
   return NODE_ENV;
 }
 
+type MailEnvs = {
+    MAIL_PASSWORD: string,
+    MAIL_HOST: string,
+    MAIL_USER: string,
+    MAIL_PORT: number,
+}
+
+function verifyMailEnvs(): MailEnvs {
+   const vals: Partial<MailEnvs> = {
+    MAIL_PASSWORD: process.env.MAIL_PASSWORD,
+    MAIL_HOST: process.env.MAIL_HOST,
+    MAIL_USER: process.env.MAIL_USER,
+    MAIL_PORT: parseInt(process.env.MAIL_PORT as string, 10) || undefined,
+  }
+
+  Object.keys(vals).forEach((key: string) => {
+    if (vals[key as keyof MailEnvs] === undefined) {
+      throw new Error(`Invalid or missing ENV: ${key}`)
+    }
+  })
+
+  return vals as MailEnvs;
+}
+
 function initializeConfig() {
     const PORT = parseInt(process.env.SERVER_PORT as string, 10);
     if (isNaN(PORT)) {
@@ -95,11 +118,18 @@ function initializeConfig() {
     const DB_NAME = process.env.DB_NAME || 'classfeed';
     const JWT_SECRET = process.env.JWT_SECRET || 'default_secret';
     const DB_HOST = process.env.DOCKER_DB_HOST || process.env.DB_HOST || 'localhost';
-    const JWT_EXPTIME = getTokenExpirationTime();
+    const JWT_EXPTIME = getExpirationTime("JWT_EXPTIME", process.env.JWT_EXPTIME);
+    const OTP_EXPTIME = getExpirationTime("OTP_EXPTIME", process.env.JWT_EXPTIME);
     const NODE_ENV = getNodeEnv();
     const FILE_STORAGE_PATH = getBucketDirectory();
 
+    const { MAIL_PASSWORD, MAIL_HOST, MAIL_USER, MAIL_PORT } = verifyMailEnvs();
+
     return {
+        MAIL_PASSWORD,
+        MAIL_HOST,
+        MAIL_USER,
+        MAIL_PORT,
         PORT,
         DB_USER,
         DB_PASSWORD,
@@ -107,6 +137,7 @@ function initializeConfig() {
         DB_HOST,
         JWT_SECRET,
         JWT_EXPTIME,
+        OTP_EXPTIME,
         NODE_ENV,
         FILE_STORAGE_PATH
     };

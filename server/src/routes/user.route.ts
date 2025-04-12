@@ -1,16 +1,16 @@
 import { Router } from "express";
 import UserController from "../controllers/user.controller";
-import Auth from "../middlewares/auth";
+import { authId } from "../middlewares/auth";
 import { tryCatch } from "../utils";
 import upload from "../config/upload";
 
 const userRoutes = Router();
 
-userRoutes.get("/", tryCatch(Auth, UserController.get));
-userRoutes.delete("/", tryCatch(Auth, UserController.remove));
-userRoutes.patch("/", tryCatch(Auth, UserController.update));
-userRoutes.patch("/profilePicture", tryCatch(upload.single("image"), Auth, UserController.updateProfilePicture));
-userRoutes.get("/profilePicture", tryCatch(Auth, UserController.getProfilePicture));
-userRoutes.delete("/profilePicture", tryCatch(Auth, UserController.deleteProfilePicture));
+userRoutes.get("/", tryCatch(authId, UserController.get));
+userRoutes.delete("/", tryCatch(authId, UserController.remove));
+userRoutes.patch("/", tryCatch(authId, UserController.update));
+userRoutes.patch("/profilePicture", tryCatch(upload.single("image"), authId, UserController.updateProfilePicture));
+userRoutes.get("/profilePicture", tryCatch(authId, UserController.getProfilePicture));
+userRoutes.delete("/profilePicture", tryCatch(authId, UserController.deleteProfilePicture));
 
 export default userRoutes;
