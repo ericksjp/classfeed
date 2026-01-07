@@ -122,6 +122,11 @@ function initializeConfig() {
     const OTP_EXPTIME = getExpirationTime("OTP_EXPTIME", process.env.JWT_EXPTIME);
     const NODE_ENV = getNodeEnv();
     const FILE_STORAGE_PATH = getBucketDirectory();
+    const FRONTEND_URL = process.env.FRONTEND_URL;
+
+    if (!FRONTEND_URL) {
+      throw new Error("Invalid or missing ENV: FRONTEND_URL");
+    }
 
     const { MAIL_PASSWORD, MAIL_HOST, MAIL_USER, MAIL_PORT } = verifyMailEnvs();
 
@@ -139,7 +144,8 @@ function initializeConfig() {
         JWT_EXPTIME,
         OTP_EXPTIME,
         NODE_ENV,
-        FILE_STORAGE_PATH
+        FILE_STORAGE_PATH,
+        FRONTEND_URL,
     };
 }
 
