@@ -11,7 +11,7 @@ const UserInput = z.object({
     .email({ message: "Invalid email" })
     .max(255, { message: "Name must be at most 255 characters long" }),
 
-  dateOfBirth: z.coerce.date({message: "Birth Date is required"})
+  birthDate: z.coerce.date({message: "Birth Date is required"})
     .max(new Date(), { message: "Date of birth must be in the past" }),
 
   password: z.string({message: "Password is required"})

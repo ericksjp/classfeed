@@ -1,7 +1,6 @@
 import { Association, HasManyCreateAssociationMixin, HasManyRemoveAssociationMixin, ModelStatic, Sequelize } from "sequelize";
 import { Model, DataTypes } from "sequelize";
 import Class from "./class.model";
-import { hashSync } from "bcryptjs";
 import { buildImageUrl } from "../utils/imageUrl";
 import { sanitizeObject, validateModels } from "../utils";
 
@@ -9,7 +8,7 @@ export type UserType = {
   id: string;
   name: string;
   email: string;
-  dateOfBirth: Date;
+  birthDate: Date;
   profilePicture: string;
   password: string,
 };
@@ -20,7 +19,7 @@ export type PublicUser = {
   id: string;
   name: string;
   email: string;
-  dateOfBirth: Date;
+  birthDate: Date;
   profilePicture: string;
 };
 
@@ -29,7 +28,7 @@ class User extends Model {
   public name!: string;
   public email!: string;
   public profilePicture!: string;
-  public dateOfBirth!: Date;
+  public birthDate!: Date;
   public password!: string;
 
   public createClass!: HasManyCreateAssociationMixin<Class>
@@ -96,7 +95,7 @@ class User extends Model {
           allowNull: false,
           defaultValue: "default_profile_picture.png"
         },
-        dateOfBirth: {
+        birthDate: {
           type: DataTypes.DATE,
           allowNull: false,
         },

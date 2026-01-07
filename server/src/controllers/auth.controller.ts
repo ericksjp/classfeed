@@ -8,7 +8,7 @@ import { AuthorizationError, ConflictError, InternalError, ValidationError } fro
 import * as Otp from "../services/opt.service";
 
 async function saveUserWithOtp(req: Request, res: Response) {
-  const { email, name, password, dateOfBirth } = req.body;
+  const { email, name, password, birthDate } = req.body;
   const { error } = UserInput.safeParse(req.body);
 
   if (error) {
@@ -29,7 +29,7 @@ async function saveUserWithOtp(req: Request, res: Response) {
   const otp = Otp.saveUser({
     email,
     name,
-    dateOfBirth,
+    birthDate: birthDate,
     password: hashSync(password),
     profilePicture: "default_profile_picture.png",
   });
