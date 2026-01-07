@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import authConfig from "../config/authConfig";
-import { NextFunction, Request, Response } from "express";
+import { RequestHandler } from "express";
 import { ZodError, ZodIssue } from "zod";
 import { ModelStatic, Model } from "sequelize";
 
@@ -10,13 +10,15 @@ export function generateToken(payload: { [key: string]: string }) {
   });
 }
 
-export function tryCatch(...middlewares: ((req: Request, res: Response, next: NextFunction) => Promise<unknown | void> | void)[]) {
-  return middlewares.map((middleware) => async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await middleware(req, res, next);
-    } catch (error) {
-      return next(error);
-    }
+export function tryCatch(...middlewares: RequestHandler[]): RequestHandler[] {
+  return middlewares.map((middleware) => {
+    return async function (req, res, next) {
+      try {
+        await middleware(req, res, next);
+      } catch (error) {
+        return next(error);
+      }
+    };
   });
 }
 
