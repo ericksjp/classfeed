@@ -97,7 +97,7 @@ class User extends Model {
         },
         birthDate: {
           type: DataTypes.DATE,
-          allowNull: false,
+          allowNull: true,
         },
         password: {
           type: DataTypes.STRING,
