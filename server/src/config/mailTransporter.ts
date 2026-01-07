@@ -5,7 +5,7 @@ import { getErrorMessage } from "../utils";
 const transporter = createTransport({
   host: MAIL_HOST,
   port: MAIL_PORT,
-  secure: true,
+  secure: false,
   auth: {
     user: MAIL_USER,
     pass: MAIL_PASSWORD,
