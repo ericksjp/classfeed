@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch TS file",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
+            "skipFiles": ["<node_internals>/**"]
+        },
+        {
+            "type": "pwa-node",
+            "request": "launch",
+            "name": "Launch server (source)",
+            "cwd": "${workspaceFolder}",
+            "program": "${workspaceFolder}/dist/server.js",
+            "skipFiles": ["<node_internals>/**"]
+        }
+    ]
+}
