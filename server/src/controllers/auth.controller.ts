@@ -72,19 +72,22 @@ async function login(req: Request, res: Response) {
     throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
   }
 
-  const user = await User.findOne({ where: { email }, raw: true });
+  const user = await User.findOne({ where: { email } });
   if (!user || !compareSync(password, user.password)) {
     throw new AuthorizationError(401, "Incorrect email or password", "ERR_AUTH");
   }
 
+  const publicProfile = user.getPublicProfile(req.protocol, req.hostname);
+
   res.status(200).json({
     success: "You are successfully connected, " + user.name,
-    token: generateToken({id: user.id}),
+    token: generateToken({ id: user.id }),
+    user: publicProfile,
   });
 }
 
 async function refresh(req: Request, res: Response) {
-  res.status(200).json({ token: generateToken({id: req.body.id}) });
+  res.status(200).json({ token: generateToken({ id: req.body.id }) });
 }
 
 export default {
