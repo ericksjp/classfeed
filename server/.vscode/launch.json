@@ -5,7 +5,7 @@
             "type": "pwa-node",
             "request": "launch",
             "name": "Launch TS file",
-            "program": "${file}",
+            "program": "${workspaceFolder}/src/server.ts",
             "cwd": "${workspaceFolder}",
             "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
             "skipFiles": ["<node_internals>/**"]
