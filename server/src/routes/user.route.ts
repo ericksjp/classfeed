@@ -9,6 +9,7 @@ const userRoutes = Router();
 userRoutes.get("/", tryCatch(authId, UserController.get));
 userRoutes.delete("/", tryCatch(authId, UserController.remove));
 userRoutes.patch("/", tryCatch(authId, UserController.update));
+userRoutes.patch("/updatePassword", tryCatch(authId, UserController.updatePassword));
 userRoutes.patch("/profilePicture", tryCatch(upload.single("image"), authId, UserController.updateProfilePicture));
 userRoutes.get("/profilePicture", tryCatch(authId, UserController.getProfilePicture));
 userRoutes.delete("/profilePicture", tryCatch(authId, UserController.deleteProfilePicture));

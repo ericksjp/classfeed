@@ -6,6 +6,7 @@ import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
 import { extractZodErrors, sanitizeObject } from "../utils";
 import { FILE_STORAGE_PATH } from "../config/config";
+import { compareSync, hashSync } from "bcryptjs";
 
 async function get(req: Request, res: Response) {
   const { id } = req.body;
@@ -34,6 +35,35 @@ async function remove(req: Request, res: Response) {
   }
 
   res.sendStatus(204);
+}
+
+async function updatePassword(req: Request, res: Response) {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      throw new ValidationError(400, "Old password and new password are required", "ERR_VALID");
+    }
+
+    const { error } = UserInput.pick({ password: true }).safeParse({ password: newPassword });
+
+    if (error) {
+      throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
+    }
+
+    const { id } = req.body;
+    const user = await User.findByPk(id, {raw: true});
+
+    if (!user) {
+      throw new EntityNotFoundError(404, "User not found", "ERR_NF");
+    }
+
+    if (!compareSync(currentPassword, user.password)) {
+      throw new ValidationError(400, "Current password is incorrect", "ERR_VALID");
+    }
+
+    await user.update({ password: hashSync(newPassword) });
+
+    res.sendStatus(200);
 }
 
 async function update(req: Request, res: Response) {
@@ -134,5 +164,6 @@ export default {
   remove,
   updateProfilePicture,
   getProfilePicture,
-  deleteProfilePicture
+  deleteProfilePicture,
+  updatePassword
 }
