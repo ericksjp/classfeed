@@ -1,4 +1,4 @@
-import express from "express"
+import express from "express";
 import rootRouter from "./routes";
 import errorHandler from "./middlewares/errorHandler";
 import cors from "cors";
@@ -9,10 +9,10 @@ const app = express();
 app.use(express.json());
 app.use(cors(corsOptions));
 
-app.use('/api', rootRouter);
+app.use("/api", rootRouter);
 
-app.use('/uploads', express.static(FILE_STORAGE_PATH));
+app.use("/uploads", express.static(FILE_STORAGE_PATH));
 
 app.use(errorHandler);
 
-export default app
+export default app;

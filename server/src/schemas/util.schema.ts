@@ -1,7 +1,7 @@
-import {z} from "zod"
+import { z } from "zod";
 
-const uuidSchema = z.string().uuid()
+const uuidSchema = z.string().uuid();
 
 export default {
-  uuidSchema,
-}
+    uuidSchema,
+};

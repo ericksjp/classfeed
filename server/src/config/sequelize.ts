@@ -1,6 +1,6 @@
 import "dotenv/config";
 import type { Options } from "sequelize";
-import { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, NODE_ENV } from "./config"
+import { DB_USER, DB_PASSWORD, DB_NAME, DB_HOST, NODE_ENV } from "./config";
 
 interface ConfigTs {
     development: Options;
@@ -52,4 +52,4 @@ const configDB: ConfigTs = {
     },
 };
 
-export = configDB[NODE_ENV]
+export = configDB[NODE_ENV];

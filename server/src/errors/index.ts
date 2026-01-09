@@ -13,15 +13,15 @@ class InternalError extends CustomError<ErrorCode> {}
 class OTPError extends CustomError<ErrorCode> {}
 
 export {
-  EntityNotFoundError,
-  ValidationError,
-  ParamError,
-  AuthorizationError,
-  AuthenticationError,
-  TokenError,
-  TimeoutError,
-  ConflictError,
-  FileError,
-  InternalError,
-  OTPError,
-}
+    EntityNotFoundError,
+    ValidationError,
+    ParamError,
+    AuthorizationError,
+    AuthenticationError,
+    TokenError,
+    TimeoutError,
+    ConflictError,
+    FileError,
+    InternalError,
+    OTPError,
+};
