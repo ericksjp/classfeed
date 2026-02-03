@@ -6,7 +6,7 @@ import { tryCatch } from "../utils";
 
 const feedbackRoutes = Router({ mergeParams: true });
 
-feedbackRoutes.get("/", tryCatch(authId, isUserTeacher, FeedbackController.getFeedbacks));
+feedbackRoutes.get("/", tryCatch(authId, isUserPartOfClass, FeedbackController.getFeedbacks));
 feedbackRoutes.get("/:feedbackId", tryCatch(authId, isUserPartOfClass, FeedbackController.getFeedbackById));
 feedbackRoutes.post("/", tryCatch(authId, isUserStudent, FeedbackController.createFeedback));
 feedbackRoutes.delete("/:feedbackId", tryCatch(authId, isUserTeacher, FeedbackController.deleteFeedback));

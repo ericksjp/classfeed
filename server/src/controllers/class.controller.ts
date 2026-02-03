@@ -53,7 +53,16 @@ export async function getClassById(req: Request, res: Response) {
         (user) => user?.getPublicProfile(req.protocol, req.hostname),
     );
 
-    res.status(200).json({ ...classInstance.dataValues, teacherId: undefined, teacher });
+    const students = classInstance.Users?.map((user) =>
+        user.getPublicProfile(req.protocol, req.hostname)
+    ) || [];
+
+    res.status(200).json({
+        ...classInstance.dataValues,
+        teacherId: undefined,
+        teacher,
+        students
+    });
     return;
 }
 

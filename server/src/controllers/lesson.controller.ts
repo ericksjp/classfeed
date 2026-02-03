@@ -47,8 +47,8 @@ export async function createLesson(req: Request, res: Response) {
         throw new EntityNotFoundError(404, "Class not found", "ERR_NF");
     }
 
-    const { title, dateTime } = req.body;
-    const { error } = LessonInput.safeParse({ title, classId: classInstance.id, dateTime });
+    const { title, dateTime, location } = req.body;
+    const { error } = LessonInput.safeParse({ title, classId: classInstance.id, dateTime, location });
 
     if (error) {
         throw new ValidationError(400, "Invalid Input Data", "ERR_VALID", extractZodErrors(error));
@@ -58,6 +58,7 @@ export async function createLesson(req: Request, res: Response) {
         title,
         classId: classInstance.id,
         dateTime,
+        location,
     });
     res.status(200).json(newLesson);
 }

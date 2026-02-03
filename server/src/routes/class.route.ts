@@ -16,6 +16,7 @@ import lessonRoutes from "./lesson.route";
 import feedbackRoutes from "./feedback.route";
 import { isUserPartOfClass, isUserStudent, isUserTeacher } from "../middlewares/verify";
 import { tryCatch } from "../utils";
+import FeedbackController from "../controllers/feedback.controller";
 
 const classRoutes = Router();
 
@@ -38,5 +39,8 @@ classRoutes.delete("/:classId/student/:studentId", tryCatch(authId, isUserTeache
 classRoutes.use("/:classId/lesson", lessonRoutes);
 
 classRoutes.use("/:classId/lesson/:lessonId/feedback", feedbackRoutes);
+
+// Route for class feedbacks (aggregate/list)
+classRoutes.get("/:classId/feedback", tryCatch(authId, isUserPartOfClass, FeedbackController.getClassFeedbacks));
 
 export default classRoutes;

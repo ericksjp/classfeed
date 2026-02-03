@@ -27,7 +27,10 @@ async function checkUserInClass(req: Request, res: Response, next: NextFunction,
     let studentClass = null;
 
     function teacherQuery() {
-        return Class.findOne({ where: { id: classId, teacherId: id } });
+        return Class.findOne({
+            where: { id: classId, teacherId: id },
+            include: [{ model: User }]
+        });
     }
 
     function studentQuery() {

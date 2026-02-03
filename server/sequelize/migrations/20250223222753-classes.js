@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable("classes", {
       id: {
         type: Sequelize.UUID,
@@ -10,32 +10,32 @@ module.exports = {
         primaryKey: true
       },
       name: {
-          type: Sequelize.STRING,
-          allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false
       },
       subject: {
-          type: Sequelize.STRING,
-          allowNull: false
+        type: Sequelize.STRING,
+        allowNull: true
       },
       institution: {
-          type: Sequelize.STRING,
-          allowNull: false
+        type: Sequelize.STRING,
+        allowNull: false
       },
       status: {
-          type: Sequelize.ENUM,
-          values: ["Ativo", "Arquivado"],
-          allowNull: false
+        type: Sequelize.ENUM,
+        values: ["Ativo", "Arquivado"],
+        allowNull: false
       },
       location: {
-          type: Sequelize.GEOMETRY('POINT'),
-          allowNull: true
+        type: Sequelize.GEOMETRY('POINT'),
+        allowNull: true
       },
       teacherId: {
         type: Sequelize.UUID,
         allowNull: false,
         references: {
-            model: "users",
-            key: "id"
+          model: "users",
+          key: "id"
         },
         onDelete: "CASCADE",
         onUpdate: "CASCADE"
@@ -68,9 +68,9 @@ module.exports = {
       type: "primary key",
     });
   },
-  
 
-  async down (queryInterface, Sequelize) {
+
+  async down(queryInterface, Sequelize) {
 
     await queryInterface.removeConstraint("user_class", "user_class_userId_classId_pk");
 

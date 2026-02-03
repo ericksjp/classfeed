@@ -10,8 +10,9 @@ const ClassInput = z.object({
     subject: z
         .string()
         .trim()
-        .min(3, { message: "Subject must be at least 3 characters long" })
-        .max(255, { message: "Subject must be at most 100 characters long" }),
+        .max(255, { message: "Subject must be at most 100 characters long" })
+        .optional()
+        .nullable(),
 
     institution: z
         .string()

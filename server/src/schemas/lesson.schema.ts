@@ -9,6 +9,8 @@ const LessonInput = z.object({
 
     dateTime: z.coerce.date().default(new Date()),
 
+    location: z.union([z.tuple([z.number(), z.number()]), z.null()]).optional(),
+
     classId: z.string({ message: "ClassId is required" }).uuid({ message: "Invalid ClassId" }),
 });
 

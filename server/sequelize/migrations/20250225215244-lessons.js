@@ -2,7 +2,7 @@
 
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-  async up (queryInterface, Sequelize) {
+  async up(queryInterface, Sequelize) {
     await queryInterface.createTable('lessons', {
       id: {
         type: Sequelize.UUID,
@@ -19,12 +19,16 @@ module.exports = {
         allowNull: false,
         defaultValue: Sequelize.NOW,
       },
-      classId:{
+      location: {
+        type: Sequelize.GEOMETRY('POINT'),
+        allowNull: true
+      },
+      classId: {
         type: Sequelize.UUID,
         allowNull: false,
-        references:{
-          model:"classes",
-          key:"id"
+        references: {
+          model: "classes",
+          key: "id"
         },
         onUpdate: "CASCADE",
         onDelete: "CASCADE",
@@ -33,7 +37,7 @@ module.exports = {
 
   },
 
-  async down (queryInterface, Sequelize) {
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("lessons");
   }
 };

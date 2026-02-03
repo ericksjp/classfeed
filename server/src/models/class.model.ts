@@ -60,7 +60,7 @@ class Class extends Model {
                 },
                 subject: {
                     type: DataTypes.STRING,
-                    allowNull: false,
+                    allowNull: true,
                 },
                 institution: {
                     type: DataTypes.STRING,
