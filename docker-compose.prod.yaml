@@ -13,8 +13,27 @@ services:
       - ./bucket:/opt/bucket
     container_name: classfeed_server
     depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - classfeed-network
+
+  migrate:
+    build:
+      context: ./server
+      target: build
+    container_name: classfeed-migrate
+    restart: "no"
+    env_file: ./server/.env
+    environment:
+      DOCKER_DB_HOST: classfeed_db
+      FILE_STORAGE_PATH: /
+    depends_on:
       db:
         condition: service_healthy
+    networks:
+      - classfeed-network
+    command: npx sequelize-cli db:migrate --debug
 
   db:
     image: postgis/postgis
@@ -34,7 +53,12 @@ services:
       timeout: 2s
       retries: 5
       start_period: 2s
+    networks:
+      - classfeed-network
 
 volumes:
   classfeed-db:
 
+networks:
+  classfeed-network:
+    driver: bridge
