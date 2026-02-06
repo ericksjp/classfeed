@@ -49,7 +49,7 @@ async function updatePassword(req: Request, res: Response) {
     }
 
     const { id } = req.body;
-    const user = await User.findByPk(id, { raw: true });
+    const user = await User.findByPk(id);
 
     if (!user) {
         throw new EntityNotFoundError(404, "User not found", "ERR_NF");
