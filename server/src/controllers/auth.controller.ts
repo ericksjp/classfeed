@@ -45,7 +45,7 @@ async function persistUser(req: Request, res: Response) {
     const user = Otp.retrieveUser(email, otpCode);
 
     const createdUser = await User.create(user).then(
-        (user) => user && user.getPublicProfile(req.protocol, req.hostname),
+        (user) => user && user.getPublicProfile(),
     );
 
     if (!createdUser) {
@@ -72,7 +72,7 @@ async function login(req: Request, res: Response) {
         throw new AuthorizationError(401, "Incorrect email or password", "ERR_AUTH");
     }
 
-    const publicProfile = user.getPublicProfile(req.protocol, req.hostname);
+    const publicProfile = user.getPublicProfile();
 
     res.status(200).json({
         success: "You are successfully connected, " + user.name,

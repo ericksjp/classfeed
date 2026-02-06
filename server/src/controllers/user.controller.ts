@@ -1,16 +1,15 @@
-import fs from "fs";
 import { Request, Response } from "express";
 import { User } from "../models/";
 import { EntityNotFoundError, InternalError, ParamError } from "../errors";
 import { UserInput } from "../schemas";
 import { ValidationError } from "../errors";
 import { extractZodErrors, sanitizeObject } from "../utils";
-import { FILE_STORAGE_PATH } from "../config/config";
 import { compareSync, hashSync } from "bcryptjs";
+import storageService from "../services/storage.service";
 
 async function get(req: Request, res: Response) {
     const { id } = req.body;
-    const user = await User.findByPk(id).then((user) => user?.getPublicProfile(req.protocol, req.hostname));
+    const user = await User.findByPk(id).then((user) => user?.getPublicProfile());
 
     if (!user) {
         throw new EntityNotFoundError(404, "User not found", "ERR_NF");
@@ -30,8 +29,7 @@ async function remove(req: Request, res: Response) {
     await user.destroy();
     const { profilePicture } = user.dataValues;
     if (profilePicture !== "default_profile_picture.png") {
-        const imagePath = `${FILE_STORAGE_PATH}/${user.profilePicture}`;
-        fs.unlinkSync(imagePath);
+        storageService.deleteFile(profilePicture)
     }
 
     res.sendStatus(204);
@@ -84,7 +82,7 @@ async function update(req: Request, res: Response) {
         throw new EntityNotFoundError(404, "User not found", "ERR_NF");
     }
 
-    const updatedUser = await user.update(updateData).then((user) => user.getPublicProfile(req.protocol, req.hostname));
+    const updatedUser = await user.update(updateData).then((user) => user.getPublicProfile());
 
     if (!updatedUser) {
         throw new InternalError(500, "Cannot update user", "ERR_INTERNAL");
@@ -97,24 +95,23 @@ async function updateProfilePicture(req: Request, res: Response) {
     const { id } = req.body;
     const filename = req.file?.filename;
 
+    if (!filename || typeof filename !== "string") {
+        throw new ParamError(400, "No image uploaded", "ERR_NF");
+    }
+
     const user = await User.findByPk(id);
 
     if (!user) {
         throw new EntityNotFoundError(404, "User not found", "ERR_NF");
     }
 
-    if (!filename) {
+    if (!filename || typeof filename !== "string") {
         throw new ParamError(400, "No image uploaded", "ERR_NF");
-    }
-
-    if (user.profilePicture !== "default_profile_picture.png") {
-        const oldImagePath = `${FILE_STORAGE_PATH}/${user.profilePicture}`;
-        fs.unlinkSync(oldImagePath);
     }
 
     const updatedUser = await user
         .update({ profilePicture: filename })
-        .then((user) => user.getPublicProfile(req.protocol, req.hostname));
+        .then((user) => user.getPublicProfile());
 
     res.status(200).json(updatedUser);
 }
@@ -144,8 +141,7 @@ async function deleteProfilePicture(req: Request, res: Response) {
         throw new ValidationError(409, "Profile picture is already the default one", "ERR_CONFLICT");
     }
 
-    const imagePath = `${FILE_STORAGE_PATH}/${user.profilePicture}`;
-    fs.unlinkSync(imagePath);
+    storageService.deleteFile(user.profilePicture);
 
     await user.update({
         profilePicture: "default_profile_picture.png",

@@ -7,8 +7,8 @@ import {
 } from "sequelize";
 import { Model, DataTypes } from "sequelize";
 import Class from "./class.model";
-import { buildImageUrl } from "../utils/imageUrl";
 import { sanitizeObject, validateModels } from "../utils";
+import storageService from "../services/storage.service";
 
 export type UserType = {
     id: string;
@@ -48,10 +48,10 @@ class User extends Model {
     };
 
     // Getter function to return a sanitized user object
-    public getPublicProfile(reqProtocol: string, reqHost: string): PublicUser {
+    public getPublicProfile(): PublicUser {
         return sanitizeObject(this.dataValues, {
             password: () => undefined,
-            profilePicture: () => buildImageUrl(reqProtocol, reqHost, this.profilePicture),
+            profilePicture: () => storageService.getPublicUrl(this.profilePicture)
         }) as PublicUser;
     }
 

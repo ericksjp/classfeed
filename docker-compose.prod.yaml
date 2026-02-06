@@ -8,12 +8,13 @@ services:
     env_file: ./server/.env
     environment:
       DOCKER_DB_HOST: db
-      FILE_STORAGE_PATH: /opt/bucket
     volumes:
       - ./bucket:/opt/bucket
     container_name: classfeed_server
     depends_on:
       migrate:
+        condition: service_completed_successfully
+      minio-init:
         condition: service_completed_successfully
     networks:
       - classfeed-network
@@ -56,8 +57,65 @@ services:
     networks:
       - classfeed-network
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      classfeed-network:
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: minio-init
+    volumes:
+      - ./docker/seeds:/seeds
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        until /usr/bin/mc alias set local http://minio:9000 minioadmin minioadmin; do
+          echo 'Waiting for MinIO...';
+          sleep 1;
+        done;
+
+        # cria bucket images
+        /usr/bin/mc mb --ignore-existing local/images;
+        # torna os objetos do bucket publicos para acesso
+        /usr/bin/mc anonymous set download local/images;
+
+        # insere avatar padroa no bucket
+        if [ -f /seeds/default_profile_picture.png ]; then
+          /usr/bin/mc cp /seeds/default_profile_picture.png local/images/default_profile_picture.png;
+          echo 'Default avatar uploaded successfully';
+        else
+          echo 'Default avatar not found at /seeds/default_profile_picture.png';
+          exit 1
+        fi;
+
+        exit 0;
+    restart: "no"
+    networks:
+      classfeed-network:
+
 volumes:
   classfeed-db:
+  minio_data:
 
 networks:
   classfeed-network:

@@ -50,11 +50,11 @@ export async function getClassById(req: Request, res: Response) {
     }
 
     const teacher = await User.findByPk(classInstance.teacherId).then(
-        (user) => user?.getPublicProfile(req.protocol, req.hostname),
+        (user) => user?.getPublicProfile(),
     );
 
     const students = classInstance.Users?.map((user) =>
-        user.getPublicProfile(req.protocol, req.hostname)
+        user.getPublicProfile()
     ) || [];
 
     res.status(200).json({
@@ -112,7 +112,7 @@ export async function getStudents(req: Request, res: Response) {
     }).then((_class) => {
         const students = _class?.Users;
         if (!students) return undefined;
-        return students.map((user) => user.getPublicProfile(req.protocol, req.hostname));
+        return students.map((user) => user.getPublicProfile());
     });
 
     res.status(200).json(students);
@@ -135,7 +135,7 @@ export async function getStudent(req: Request, res: Response) {
     }).then((_class) => {
         const student = _class?.Users?.at(0);
         if (!student) return undefined;
-        return student.getPublicProfile(req.protocol, req.hostname);
+        return student.getPublicProfile();
     });
 
     if (!student) {

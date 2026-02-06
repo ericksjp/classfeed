@@ -8,7 +8,6 @@ services:
     env_file: ./server/.env
     environment:
       DOCKER_DB_HOST: db
-      FILE_STORAGE_PATH: /opt/bucket
     volumes:
       - ./server/src/:/opt/app/src
       - ./server/package.json:/opt/app/package.json

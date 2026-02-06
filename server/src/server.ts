@@ -3,6 +3,7 @@ import { sequelize } from "./models/index";
 import app from "./app";
 import { Server } from "http";
 import transporter, { verifyTransporterConnection } from "./config/mailTransporter";
+import { verifyS3Connection } from "./config/s3Client";
 
 let server: Server;
 
@@ -31,6 +32,8 @@ async function init() {
         console.log("Connected to the database!");
         await verifyTransporterConnection();
         console.log("Mail transporter verified!");
+        await verifyS3Connection();
+        console.log("S3 connection verified!");
 
         server = app.listen(PORT, () => console.log(`App running on port ${PORT}...`));
     } catch (error) {
