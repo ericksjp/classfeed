@@ -1,59 +1,66 @@
 # Classfeed
+
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-## Running the Project
+## Executando o Projeto
 
-### Required Software
+### Software Necessário
+
 - Docker
 - Git
+- Make (opcional, mas recomendado)
 
-### Step 1 - Clone the Repository
+### Passo 1 - Clonar o Repositório
 
 ```bash
 git clone https://github.com/ericksjp/classfeed
 cd classfeed
 ```
 
-### Step 2 - Set Up the .env File
+### Passo 2 - Configurar o Arquivo .env
 
-To configure the server, you need to create a `.env` file based on the provided `.env.example` template. Follow the instructions below for your operating system:
+Para configurar o servidor, você precisa criar um arquivo `.env` baseado no template `.env.example` fornecido. Siga as instruções abaixo para o seu sistema operacional:
 
 #### Linux/macOS:
+
 ```bash
-cd server
 cp .env.example .env
 ```
 
 #### Windows:
+
 ```powershell
-cd server
 Copy-Item .env.example .env
 ```
 
-After copying the file, open the newly created `.env` file and update the configuration settings as required for your environment.
+Após copiar o arquivo, abra o arquivo `.env` recém-criado e atualize as configurações conforme necessário para o seu ambiente.
 
-### Step 3 - Running Docker
+### Passo 3 - Executando o Docker Compose
 
-To build the images and run the containers, navigate to the directory containing the Docker Compose files. If you are in the `server` folder, first navigate back to the root directory:
+Para construir as imagens e executar os containers, use os comandos `make` definidos no arquivo **Makefile**.
 
-```bash
-cd ..
+| Comando              | Descrição                                                 | Uso Recomendado     |
+| -------------------- | --------------------------------------------------------- | ------------------- |
+| `make compose`       | Inicia os containers                                      | **Padrão**          |
+| `make compose-dev`   | Inicia os containers em modo desenvolvimento (hot-reload) | **Desenvolvimento** |
+| `make compose-debug` | Inicia os containers com debug habilitado                 | **Depuração**       |
+| `make down`          | Para e remove todos os containers                         | **Encerramento**    |
+
+### Passo 4 - Acessando a Aplicação
+
+Apos iniciar os containers, você pode acessar:
+
+- **API**: http://localhost:3001
+- **Banco de Dados**: PostgreSQL na porta 5432
+
+### Estrutura do Projeto
+
 ```
-
-#### Development Build
-To run the project using the development build, execute the following command:
-
-```bash
-docker-compose -f docker-compose.dev.yaml up --build
+classfeed/
+├── compose/           # Arquivos de configuração Docker
+├── src/              # Código fonte da aplicação
+├── sequelize/        # Migrações do banco de dados
+├── .env.example      # Template de variáveis de ambiente
+├── Dockerfile        # Configuração Docker da aplicação
+└── Makefile          # Comandos automatizados
 ```
-
-#### Production Build (Unstable at This Moment)
-To run the project using the production build, execute the following command:
-
-```bash
-docker-compose -f docker-compose.prod.yaml up --build
-```
-
-### Additional Information
-
-- Ensure Docker is running before executing the Docker commands.
