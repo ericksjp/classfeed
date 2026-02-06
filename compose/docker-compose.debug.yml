@@ -1,0 +1,7 @@
+services:
+  server:
+    volumes: []
+    ports:
+      - "9229:9229"
+    command: node --inspect=0.0.0.0:9229 node_modules/.bin/tsx src/server.ts
+    restart: no

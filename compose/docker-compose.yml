@@ -1,16 +1,13 @@
 services:
   server:
     build:
-      context: ./server
+      context: ..
       target: production
     ports:
       - 3001:3001
-    env_file: ./server/.env
+    env_file: ../.env
     environment:
       DOCKER_DB_HOST: db
-    volumes:
-      - ./bucket:/opt/bucket
-    container_name: classfeed_server
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -21,14 +18,12 @@ services:
 
   migrate:
     build:
-      context: ./server
+      context: ..
       target: build
-    container_name: classfeed-migrate
     restart: "no"
-    env_file: ./server/.env
+    env_file: ../.env
     environment:
-      DOCKER_DB_HOST: classfeed_db
-      FILE_STORAGE_PATH: /
+      DOCKER_DB_HOST: db
     depends_on:
       db:
         condition: service_healthy
@@ -45,7 +40,6 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=classfeed
     restart: always
-    container_name: classfeed_db
     volumes:
       - classfeed-db:/var/lib/postgresql/data
     healthcheck:
@@ -59,7 +53,6 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: minio
     command: server /data --console-address ":9001"
     ports:
       - "9000:9000"
@@ -79,9 +72,8 @@ services:
 
   minio-init:
     image: minio/mc:latest
-    container_name: minio-init
     volumes:
-      - ./docker/seeds:/seeds
+      - ./minio-seed:/seeds
     depends_on:
       minio:
         condition: service_healthy
@@ -111,7 +103,7 @@ services:
         exit 0;
     restart: "no"
     networks:
-      classfeed-network:
+      - classfeed-network
 
 volumes:
   classfeed-db:

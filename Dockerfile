@@ -1,6 +1,6 @@
 FROM node:20-alpine AS build
 
-ENV NODE_ENV development
+ENV NODE_ENV=development
 EXPOSE 3001
 
 RUN mkdir -p /opt/app
@@ -17,7 +17,7 @@ RUN npm run build
 # Stage 2: Production
 FROM node:20-alpine AS production
 
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
 RUN mkdir -p /opt/app
 WORKDIR /opt/app

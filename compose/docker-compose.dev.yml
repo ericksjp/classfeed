@@ -1,0 +1,15 @@
+services:
+  server:
+    build:
+      context: .
+      target: build
+    volumes:
+      - ./src:/opt/app/src
+      - ./package.json:/opt/app/package.json
+      - ./package-lock.json:/opt/app/package-lock.json
+      - node_modules:/opt/app/node_modules
+    command: npm run dev
+    restart: always
+
+volumes:
+  node_modules:

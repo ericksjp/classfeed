@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "docker-compose-up-debug",
+      "type": "shell",
+      "command": "make compose-up-debug",
+      "isBackground": false
+    },
+    {
+      "label": "docker-compose-down",
+      "type": "shell",
+      "command": "make compose-down",
+    }
+  ]
+}
